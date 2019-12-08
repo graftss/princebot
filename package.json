@@ -1,0 +1,16 @@
+{
+  "name": "princebot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "typescript": "^3.7.3"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "outDir": "build",
+    "sourceMap": true,
+    "target": "es6",
+    "strictNullChecks": true
+  }
+}
