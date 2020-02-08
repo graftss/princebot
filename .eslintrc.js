@@ -38,7 +38,7 @@ module.exports = {
     'import/order': ['error', {
       'newlines-between': 'never',
     }],
-    'no-console': 'error',
+    'no-console': 'off',
     'react/no-render-return-value': 'off',
     'react/prop-types': 'off',
   },

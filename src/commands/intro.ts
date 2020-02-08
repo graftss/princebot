@@ -8,5 +8,5 @@ export const command: Command = {
 
   handle(message: Discord.Message) {
     return message.channel.send('hi');
-  }
-}
+  },
+};

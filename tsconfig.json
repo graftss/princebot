@@ -6,6 +6,7 @@
     "module": "commonjs",
     "outDir": "build",
     "target": "es6",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true
   }
 }
