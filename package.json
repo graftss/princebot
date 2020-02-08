@@ -24,6 +24,7 @@
     "build": "tsc",
     "lint": "eslint --ext .ts,.tsx --fix src/**/* || exit 0",
     "start": "node build/index.js",
+    "test": "set NODE_ENV=development&& npm start",
     "watch": "tsc --watch"
   }
 }
