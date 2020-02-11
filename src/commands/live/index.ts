@@ -6,7 +6,7 @@ const testConfig: NotificationConfig = {
   channelId: '675463218050891806',
   updateInterval: 5 * 1000,
   query: {
-    usernames: ['trihex'],
+    usernames: ['trihex', 'dunewacky'],
   },
 };
 

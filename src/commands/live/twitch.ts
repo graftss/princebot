@@ -1,4 +1,5 @@
 import request from 'request-promise';
+import * as _ from 'lodash';
 import { auth } from '../../auth';
 
 export interface StreamQuery {
@@ -12,7 +13,35 @@ export interface StreamInfo {
   title: string;
 }
 
-export type LiveUpdate = StreamInfo[];
+export interface UserInfo {
+  username: string;
+  avatarUrl: string;
+}
+
+export interface LiveStreamInfo extends StreamInfo, UserInfo {}
+
+export type LiveUpdate = LiveStreamInfo[];
+
+const headers = {
+  Authorization: `Bearer: ${auth.twitch.secret}`,
+  'Client-ID': auth.twitch.clientId,
+};
+
+const extractUserInfo = (twitchUserObj: any): UserInfo => ({
+  username: twitchUserObj.display_name,
+  avatarUrl: twitchUserObj.profile_image_url,
+});
+
+export const getUserInfo = (usernames: string[]): Promise<UserInfo[]> => {
+  return request({
+    uri: 'https://api.twitch.tv/helix/users',
+    qs: {
+      login: usernames,
+    },
+    json: true,
+    headers,
+  }).then(res => res.data.map(extractUserInfo));
+};
 
 const extractStreamInfo = (twitchStreamObj: any): StreamInfo => ({
   userId: twitchStreamObj.user_id,
@@ -21,12 +50,9 @@ const extractStreamInfo = (twitchStreamObj: any): StreamInfo => ({
   title: twitchStreamObj.title,
 });
 
-const headers = {
-  Authorization: `Bearer: ${auth.twitch.secret}`,
-  'Client-ID': auth.twitch.clientId,
-};
-
-export const getTwitchStreams = (query: StreamQuery): Promise<LiveUpdate> => {
+export const getTwitchStreamInfo = (
+  query: StreamQuery,
+): Promise<StreamInfo[]> => {
   return request({
     uri: 'https://api.twitch.tv/helix/streams',
     qs: {
@@ -36,4 +62,12 @@ export const getTwitchStreams = (query: StreamQuery): Promise<LiveUpdate> => {
     json: true,
     headers,
   }).then(res => res.data.map(extractStreamInfo));
+};
+
+export const getTwitchUpdate = (query: StreamQuery): Promise<LiveUpdate> => {
+  return getTwitchStreamInfo(query).then(streams => {
+    return getUserInfo(streams.map(s => s.username)).then(users =>
+      _.zipWith(streams, users, (a, b) => ({ ...a, ...b })),
+    );
+  });
 };
