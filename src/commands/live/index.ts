@@ -16,9 +16,12 @@ const config: NotificationConfig = {
   updateInterval: 60 * 1000,
   query: {
     usernames: [
+      'csaur',
       'dunewacky',
+      'euclid999',
       'harutomo',
       'jokopoking',
+      'journeymanb',
       'klohinx',
       'kumasbear',
       'martini',
