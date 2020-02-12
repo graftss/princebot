@@ -66,6 +66,9 @@ export const getTwitchStreamInfo = (
 
 export const getTwitchUpdate = (query: StreamQuery): Promise<LiveUpdate> => {
   return getTwitchStreamInfo(query).then(streams => {
+    // don't query `users` if there aren't any streams
+    if (streams.length === 0) return [];
+
     return getUserInfo(streams.map(s => s.username)).then(users =>
       _.zipWith(streams, users, (a, b) => ({ ...a, ...b })),
     );
