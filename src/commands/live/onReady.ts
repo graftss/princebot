@@ -1,4 +1,6 @@
+import path from 'path';
 import Discord from 'discord.js';
+import { PersistentState } from '../../PersistentState';
 import {
   LiveUpdate,
   StreamQuery,
@@ -6,8 +8,24 @@ import {
   getTwitchUpdate,
 } from './twitch';
 
+type LiveState = { [K in string]: LiveStreamInfo };
+
 class StreamPoller {
-  liveState = {};
+  liveState: LiveState = {};
+
+  persist: boolean;
+  persistentState: PersistentState<LiveState>;
+
+  constructor(persistentStatePath?: string) {
+    if (persistentStatePath !== undefined) {
+      this.persist = true;
+      this.persistentState = new PersistentState(persistentStatePath, {
+        defaultState: this.liveState,
+        writePretty: true,
+      });
+      this.liveState = this.persistentState.get();
+    }
+  }
 
   // diffs `liveState` with `update`, and returns a `LiveUpdate` that contains
   // only new streams.
@@ -18,13 +36,17 @@ class StreamPoller {
     // remove streams that have gone offline from the state
     for (const userId in liveState) {
       if (streams.filter(s => s.userId === userId).length === 0) {
-        liveState[userId] = undefined;
+        delete liveState[userId];
       }
     }
 
     // add streams that have gone online to the state and the result
     const result = streams.filter(stream => !liveState[stream.userId]);
     streams.forEach(stream => (liveState[stream.userId] = stream));
+
+    if (this.persist) {
+      this.persistentState.set(liveState);
+    }
 
     return result;
   }
@@ -97,13 +119,12 @@ export const onReady = (
 ): void => {
   const { updateInterval, query } = config;
 
-  const poller = new StreamPoller();
+  const poller = new StreamPoller(path.join(__dirname, 'state.json'));
   const channel = getTargetChannel(client, config);
   const send = (channel.send as Sender).bind(channel);
 
   const update = (): void => {
     poller.pollLiveStreams(query).then(liveUpdate => {
-      console.log(liveUpdate);
       sendLiveUpdate(send, filterLiveUpdate(liveUpdate));
     });
   };

@@ -6,11 +6,11 @@ const testConfig: NotificationConfig = {
   channelId: '675463218050891806',
   updateInterval: 5 * 1000,
   query: {
-    usernames: ['dunewacky'],
+    usernames: ['dunewacky', 'iateyourpie', 'harutomo'],
   },
 };
 
-const config: NotificationConfig = {
+const prodConfig: NotificationConfig = {
   guildId: '232268612285497345',
   channelId: '535643965899276289',
   updateInterval: 60 * 1000,
@@ -35,9 +35,9 @@ const config: NotificationConfig = {
 };
 
 export const command: Command = {
-  onReady: client =>
-    onReady(
-      client,
-      process.env.NODE_ENV === 'development' ? testConfig : config,
-    ),
+  onReady: client => {
+    const config =
+      process.env.NODE_ENV === 'development' ? testConfig : prodConfig;
+    return onReady(client, config);
+  },
 };
