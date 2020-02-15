@@ -56,16 +56,10 @@ class StreamPoller {
   }
 }
 
-// const katamariGameIds = [
-//   '10902', // Katamari Damacy
-//   '10724', // Beautiful Katamari
-//   '16842', // We Love Katamari
-//   '23196', // Katamari Forever,
-// ];
-
 const filterLiveUpdate = (update: LiveUpdate): LiveUpdate =>
-  // update.filter(stream => katamariGameIds.includes(stream.gameId));
-  update;
+  update.filter(
+    stream => stream.game && stream.game.toLowerCase().includes('katamari'),
+  );
 
 const sample = (arr): any => arr[Math.floor(Math.random() * arr.length)];
 const emotes = [
@@ -83,9 +77,10 @@ const twitchUrl = (stream: LiveStreamInfo): string =>
 const embedStreamInfo = (stream: LiveStreamInfo): Discord.RichEmbed =>
   new Discord.RichEmbed()
     .setURL(twitchUrl(stream))
-    .setAuthor(stream.username)
+    .setAuthor(`${stream.username} is live!`)
     .setTitle(stream.title)
-    .setDescription(slots())
+    .setDescription(`playing ${stream.game}`)
+    .addField('\u200b', slots())
     .setColor('#7289da')
     .setThumbnail(stream.avatarUrl)
     .setTimestamp();
@@ -111,15 +106,20 @@ export interface NotificationConfig {
   channelId: string;
   updateInterval: number;
   query: StreamQuery;
+  persist?: boolean;
 }
 
 export const onReady = (
   client: Discord.Client,
   config: NotificationConfig,
 ): void => {
-  const { updateInterval, query } = config;
+  const { updateInterval, query, persist = true } = config;
 
-  const poller = new StreamPoller(path.join(__dirname, 'state.json'));
+  const statePath = persist
+    ? path.join(__dirname, `live-state-${config.guildId}.json`)
+    : undefined;
+
+  const poller = new StreamPoller(statePath);
   const channel = getTargetChannel(client, config);
   const send = (channel.send as Sender).bind(channel);
 

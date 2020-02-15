@@ -6,8 +6,9 @@ const testConfig: NotificationConfig = {
   channelId: '675463218050891806',
   updateInterval: 5 * 1000,
   query: {
-    usernames: ['dunewacky', 'iateyourpie', 'harutomo'],
+    usernames: ['dunewacky', 'iateyourpie', 'harutomo', 'trihex', 'ickyy'],
   },
+  persist: false,
 };
 
 const prodConfig: NotificationConfig = {
