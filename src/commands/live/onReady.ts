@@ -56,9 +56,12 @@ class StreamPoller {
   }
 }
 
+const isGameWhitelisted = (game: string): boolean =>
+  game.includes('katamari') || game.includes('stretch');
+
 const filterLiveUpdate = (update: LiveUpdate): LiveUpdate =>
   update.filter(
-    stream => stream.game && stream.game.toLowerCase().includes('katamari'),
+    stream => stream.game && isGameWhitelisted(stream.game.toLowerCase()),
   );
 
 const sample = (arr): any => arr[Math.floor(Math.random() * arr.length)];
