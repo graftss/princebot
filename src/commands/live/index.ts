@@ -21,6 +21,7 @@ const prodConfig: NotificationConfig = {
       'dunewacky',
       'euclid999',
       'harutomo',
+      'hotdogturtle',
       'jokopoking',
       'journeymanb',
       'klohinx',
