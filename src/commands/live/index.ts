@@ -17,6 +17,7 @@ const prodConfig: NotificationConfig = {
   updateInterval: 60 * 1000,
   query: {
     usernames: [
+      'cherry_soup',
       'csaur',
       'dunewacky',
       'euclid999',
