@@ -35,6 +35,7 @@ const prodConfig: NotificationConfig = {
       'jokopoking',
       'journeymanb',
       'klohinx',
+      'kotonebeta',
       'kumasbear',
       'martini',
       'midboss2',
