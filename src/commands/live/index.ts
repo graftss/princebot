@@ -39,6 +39,7 @@ const prodConfig: NotificationConfig = {
       'kumasbear',
       'martini',
       'midboss2',
+      'paperspine',
       'pimittens',
       'pvtcb',
       'randomizerhater92',
