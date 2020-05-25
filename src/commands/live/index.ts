@@ -27,6 +27,7 @@ const prodConfig: NotificationConfig = {
     usernames: [
       'cherry_soup',
       'csaur',
+      'devteamster',
       'dunewacky',
       'euclid999',
       'harutomo',
