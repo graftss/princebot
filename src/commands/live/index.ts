@@ -29,7 +29,7 @@ const prodConfig: NotificationConfig = {
       'csaur',
       'devteamster',
       'dunewacky',
-      'enzor9000',
+      'enzor_au',
       'euclid999',
       'harutomo',
       'hotdogturtle',
