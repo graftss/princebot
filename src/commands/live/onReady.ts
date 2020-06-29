@@ -61,7 +61,7 @@ class StreamPoller {
 }
 
 const isGameWhitelisted = (game: string): boolean =>
-  game.includes('katamari') || game.includes('stretch');
+  game.includes('katamari') || game.includes('stretch') || game.includes('turbo turtle adventure');
 
 const filterLiveUpdate = (update: LiveUpdate): LiveUpdate =>
   update.filter(
