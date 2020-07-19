@@ -31,6 +31,7 @@ const prodConfig: NotificationConfig = {
       'dunewacky',
       'enzor_au',
       'euclid999',
+      'gordonpint',
       'harutomo',
       'hotdogturtle',
       'italyflecktarn',
