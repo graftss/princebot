@@ -35,8 +35,6 @@ class StreamPoller {
     const { liveState } = this;
     const streams = this.updateFilter ? this.updateFilter(update) : update;
 
-    console.log({ streams });
-
     // remove streams that have gone offline from the state
     for (const userId in liveState) {
       if (streams.filter(s => s.userId === userId).length === 0) {
