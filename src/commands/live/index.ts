@@ -13,16 +13,33 @@ const testConfig: NotificationConfig = {
       'trihex',
       'ickyy',
       'vektroidlive',
-      'mechasheeva',
+      'tempest_fox',
     ],
   },
   persist: false,
+};
+
+const chestConfig: NotificationConfig = {
+  guildId: '679160088090640424',
+  channelId: '679344618411655168',
+  updateInterval: 60 * 1000,
+  isGameWhitelisted: (game: string): boolean =>
+    game.includes('stretch panic') ||
+    game.includes('silhouette mirage') ||
+    game.includes('rakugaki'),
+  query: {
+    usernames: ['chaos42666', 'dunewacky', 'pimittens', 'placebo120', 'rrifff'],
+  },
 };
 
 const prodConfig: NotificationConfig = {
   guildId: '232268612285497345',
   channelId: '535643965899276289',
   updateInterval: 60 * 1000,
+  isGameWhitelisted: (game: string): boolean =>
+    game.includes('katamari') ||
+    game.includes('turbo turtle adventure') ||
+    game.includes('wattam'),
   query: {
     usernames: [
       'cherry_soup',
@@ -57,8 +74,11 @@ const prodConfig: NotificationConfig = {
 
 export const command: Command = {
   onReady: client => {
-    const config =
-      process.env.NODE_ENV === 'development' ? testConfig : prodConfig;
-    return onReady(client, config);
+    if (process.env.NODE_ENV === 'development') {
+      onReady(client, testConfig);
+    } else {
+      onReady(client, prodConfig);
+      onReady(client, chestConfig);
+    }
   },
 };

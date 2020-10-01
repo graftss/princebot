@@ -58,13 +58,9 @@ class StreamPoller {
   }
 }
 
-const isGameWhitelisted = (game: string): boolean =>
-  game.includes('katamari') ||
-  game.includes('stretch') ||
-  game.includes('turbo turtle adventure') ||
-  game.includes('wattam');
-
-const filterLiveUpdate = (update: LiveUpdate): LiveUpdate =>
+const filterLiveUpdate = (isGameWhitelisted: (game: string) => boolean) => (
+  update: LiveUpdate,
+): LiveUpdate =>
   update.filter(
     stream => stream.game && isGameWhitelisted(stream.game.toLowerCase()),
   );
@@ -114,6 +110,7 @@ export interface NotificationConfig {
   channelId: string;
   updateInterval: number;
   query: StreamQuery;
+  isGameWhitelisted?: (game: string) => boolean;
   persist?: boolean;
 }
 
@@ -131,7 +128,9 @@ export const onReady = (
   const channel = getTargetChannel(client, config);
   const send = (channel.send as Sender).bind(channel);
 
-  poller.updateFilter = filterLiveUpdate;
+  poller.updateFilter = filterLiveUpdate(
+    config.isGameWhitelisted || (() => true),
+  );
 
   const update = (): void => {
     poller.pollLiveStreams(query).then(liveUpdate => {
