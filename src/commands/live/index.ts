@@ -66,6 +66,7 @@ const prodConfig: NotificationConfig = {
       'pvtcb',
       'randomizerhater92',
       'rattmann_',
+      'shamana',
       'sisuka7',
       'theterrifictracy',
     ],
