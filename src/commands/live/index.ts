@@ -28,7 +28,14 @@ const chestConfig: NotificationConfig = {
     game.includes('silhouette mirage') ||
     game.includes('rakugaki'),
   query: {
-    usernames: ['chaos42666', 'dunewacky', 'pimittens', 'placebo120', 'rrifff'],
+    usernames: [
+      'bodogecatuncle',
+      'chaos42666',
+      'dunewacky',
+      'pimittens',
+      'placebo120',
+      'rrifff',
+    ],
   },
 };
 
