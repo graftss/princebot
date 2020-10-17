@@ -4,10 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/irc": "^0.3.33",
+    "@types/tmi.js": "^1.4.2",
     "discord.js": "^11.5.1",
+    "irc": "^0.5.2",
     "lodash": "^4.17.15",
     "request": "^2.88.0",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.5",
+    "tmi.js": "^1.5.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.149",
@@ -25,8 +29,10 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint --ext .ts,.tsx --fix src/**/* || exit 0",
-    "start": "node build/index.js",
-    "test": "set NODE_ENV=development&& npm start",
+    "discord": "node build/discord/index.js",
+    "discord-test": "set NODE_ENV=development&& npm run discord",
+    "twitch": "node build/twitch/index.js",
+    "twitch-test": "set NODE_ENV=development&& npm run twitch",
     "watch": "tsc --watch"
   }
 }
