@@ -1,7 +1,7 @@
 import path from 'path';
 import Discord from 'discord.js';
+import { auth } from '../auth';
 import { loadCommandsFromDir } from './Command';
-import { auth } from './auth';
 import { PersistentState } from './PersistentState';
 
 interface ClientConfig {
@@ -9,7 +9,12 @@ interface ClientConfig {
   commandsDir: string;
 }
 
-const startClient = (config: ClientConfig): Promise<string> => {
+const config: ClientConfig = {
+  statePath: path.resolve('../state.json'),
+  commandsDir: path.join(__dirname, 'commands'),
+};
+
+export const createDiscordBot = (): Promise<string> => {
   const client = new Discord.Client();
   const commands = loadCommandsFromDir(config.commandsDir);
   const state: PersistentState<any> = new PersistentState(config.statePath);
@@ -33,9 +38,4 @@ const startClient = (config: ClientConfig): Promise<string> => {
   return client.login(auth.discord.token);
 };
 
-const config: ClientConfig = {
-  statePath: path.resolve('../state.json'),
-  commandsDir: path.join(__dirname, 'commands'),
-};
-
-startClient(config);
+createDiscordBot();

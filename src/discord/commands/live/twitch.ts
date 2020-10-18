@@ -1,6 +1,6 @@
 import request from 'request-promise';
 import * as _ from 'lodash';
-import { auth } from '../../auth';
+import { auth } from '../../../auth';
 
 export interface StreamQuery {
   usernames: string[];
