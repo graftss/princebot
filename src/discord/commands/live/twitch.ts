@@ -23,10 +23,48 @@ export interface LiveStreamInfo extends StreamInfo, UserInfo {}
 
 export type LiveUpdate = LiveStreamInfo[];
 
-const headers = {
-  Authorization: `Bearer: ${auth.twitch.secret}`,
+class TwitchOAuthToken {
+  private token = '';
+
+  constructor(private clientID: string, private clientSecret: string) {}
+
+  getToken(): string {
+    return this.token;
+  }
+
+  refreshToken(): Promise<string> {
+    return request({
+      method: 'POST',
+      uri: 'https://id.twitch.tv/oauth2/token',
+      qs: {
+        client_id: this.clientID,
+        client_secret: this.clientSecret,
+        grant_type: 'client_credentials',
+      },
+      json: true,
+    }).then(res => (this.token = res.access_token));
+  }
+}
+
+const oauth = new TwitchOAuthToken(auth.twitch.clientId, auth.twitch.secret);
+
+const getHeaders = (): object => ({
+  Authorization: `Bearer ${oauth.getToken()}`,
   'Client-ID': auth.twitch.clientId,
-};
+  Accept: 'application/vnd.twitchtv.v5+json',
+});
+
+const twitchRequest = (args: any): Promise<any> =>
+  request({
+    ...args,
+    json: true,
+    headers: getHeaders(),
+  }).catch(e => {
+    // oauth token failure
+    if (e.response.body.status === 401) {
+      return oauth.refreshToken().then(() => twitchRequest(args));
+    }
+  });
 
 const extractUserInfo = (twitchUserObj: any): UserInfo => ({
   username: twitchUserObj.display_name,
@@ -34,13 +72,11 @@ const extractUserInfo = (twitchUserObj: any): UserInfo => ({
 });
 
 export const getUserInfo = (usernames: string[]): Promise<UserInfo[]> => {
-  return request({
+  return twitchRequest({
     uri: 'https://api.twitch.tv/helix/users',
     qs: {
       login: usernames,
     },
-    json: true,
-    headers,
   }).then(res => res.data.map(extractUserInfo));
 };
 
@@ -58,11 +94,9 @@ class GameNameResolver {
       return Promise.resolve(ids.map(id => this.cache[id]));
     }
 
-    return request({
+    return twitchRequest({
       uri: 'https://api.twitch.tv/helix/games',
       qs: { id: ids },
-      json: true,
-      headers,
     }).then((res: { data: TwitchGameObject[] }) => {
       res.data.forEach(obj => (this.cache[obj.id] = obj.name));
       return ids.map(id => this.cache[id]);
@@ -83,14 +117,12 @@ const extractStreamInfo = (twitchStreamObj: any): StreamInfo => ({
 export const getTwitchStreamInfo = (
   query: StreamQuery,
 ): Promise<StreamInfo[]> => {
-  return request({
+  return twitchRequest({
     uri: 'https://api.twitch.tv/helix/streams',
     qs: {
       // eslint-disable-next-line @typescript-eslint/camelcase
       user_login: query.usernames,
     },
-    json: true,
-    headers,
   })
     .then(res => res.data.map(extractStreamInfo))
     .then((streams: StreamInfo[]) =>

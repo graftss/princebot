@@ -20,6 +20,7 @@ module.exports = {
   ],
 
   rules: {
+    '@typescript-eslint/camelcase': 0,
     '@typescript-eslint/explicit-function-return-type': ['error', {
       allowExpressions: true,
       allowTypedFunctionExpressions: true,

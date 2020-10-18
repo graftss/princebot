@@ -11,10 +11,10 @@ import {
 type LiveState = { [K in string]: LiveStreamInfo };
 
 class StreamPoller {
-  liveState: LiveState = {};
-
+  private liveState: LiveState = {};
   persist: boolean;
   persistentState: PersistentState<LiveState>;
+  updateFilter: (l: LiveUpdate) => LiveUpdate;
 
   constructor(persistentStatePath?: string) {
     if (persistentStatePath !== undefined) {
@@ -25,13 +25,15 @@ class StreamPoller {
       });
       this.liveState = this.persistentState.get();
     }
+
+    this.updateLiveState = this.updateLiveState.bind(this);
   }
 
   // diffs `liveState` with `update`, and returns a `LiveUpdate` that contains
   // only new streams.
-  private updateLiveState(update: LiveUpdate): LiveUpdate {
+  updateLiveState(update: LiveUpdate): LiveUpdate {
     const { liveState } = this;
-    const streams = update;
+    const streams = this.updateFilter ? this.updateFilter(update) : update;
 
     // remove streams that have gone offline from the state
     for (const userId in liveState) {
@@ -52,14 +54,13 @@ class StreamPoller {
   }
 
   pollLiveStreams(query: StreamQuery): Promise<LiveUpdate> {
-    return getTwitchUpdate(query).then(update => this.updateLiveState(update));
+    return getTwitchUpdate(query).then(this.updateLiveState);
   }
 }
 
-const isGameWhitelisted = (game: string): boolean =>
-  game.includes('katamari') || game.includes('stretch');
-
-const filterLiveUpdate = (update: LiveUpdate): LiveUpdate =>
+const filterLiveUpdate = (isGameWhitelisted: (game: string) => boolean) => (
+  update: LiveUpdate,
+): LiveUpdate =>
   update.filter(
     stream => stream.game && isGameWhitelisted(stream.game.toLowerCase()),
   );
@@ -109,6 +110,7 @@ export interface NotificationConfig {
   channelId: string;
   updateInterval: number;
   query: StreamQuery;
+  isGameWhitelisted?: (game: string) => boolean;
   persist?: boolean;
 }
 
@@ -126,9 +128,13 @@ export const onReady = (
   const channel = getTargetChannel(client, config);
   const send = (channel.send as Sender).bind(channel);
 
+  poller.updateFilter = filterLiveUpdate(
+    config.isGameWhitelisted || (() => true),
+  );
+
   const update = (): void => {
     poller.pollLiveStreams(query).then(liveUpdate => {
-      sendLiveUpdate(send, filterLiveUpdate(liveUpdate));
+      sendLiveUpdate(send, liveUpdate);
     });
   };
 
