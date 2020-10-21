@@ -66,13 +66,20 @@ const filterLiveUpdate = (isGameWhitelisted: (game: string) => boolean) => (
   );
 
 const sample = (arr): any => arr[Math.floor(Math.random() * arr.length)];
+
+const retired = [
+  '<:cartLady:606338985706651688>',
+  '<:pogHam:611584211660439552>',
+];
+
 const emotes = [
   '<:babyCow:625343020702629889>',
   '<:dogLuck:606340486206193714>',
-  '<:pogHam:611584211660439552>',
   '<:scuffed:609557151685279805>',
-  '<:cartLady:606338985706651688>',
+  '<:pogRan:714295923320291361>',
+  '<:SwagBoat:714548717390266478>',
 ];
+
 const slots = (): any => [1, 2, 3, 4, 5].map(() => sample(emotes)).join(' ');
 
 const twitchUrl = (stream: LiveStreamInfo): string =>
