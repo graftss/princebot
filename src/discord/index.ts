@@ -43,7 +43,7 @@ export const createDiscordBot = (): Promise<string> => {
 
   client.once('ready', () => {
     commands.forEach(command => {
-      if (command.onReady) {
+      if (command && command.onReady) {
         command.onReady(client, state);
       }
     });
@@ -52,6 +52,7 @@ export const createDiscordBot = (): Promise<string> => {
   client.on('message', message => {
     commands.forEach(command => {
       if (
+        command &&
         command.match &&
         command.handle &&
         command.match(message) &&

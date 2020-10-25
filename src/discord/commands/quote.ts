@@ -5,7 +5,7 @@ import {
   Language,
   stringDb,
   parseLanguage,
-  langStr,
+  printKdrString,
 } from '../../lib/reroll-strings';
 
 const parseLangFromArgs = (args: string[]): Language => {
@@ -15,21 +15,32 @@ const parseLangFromArgs = (args: string[]): Language => {
 };
 
 export const command: Command = {
-  cooldown: 300,
-
   match(message: Discord.Message): boolean {
-    return message.content.startsWith('.quote');
+    return (
+      message.content.startsWith('.quote') ||
+      message.content.startsWith('.string')
+    );
   },
 
   handle(message: Discord.Message) {
     const args = message.content.split(/\s+/);
 
     const l: Language = parseLangFromArgs(args);
-    const lang: string = langStr(l);
-    const row: KDRStringRow = stringDb.randomString(l);
+    const row: KDRStringRow = message.content.startsWith('.quote')
+      ? stringDb.randomSpokenString(l)
+      : stringDb.randomString(l);
 
-    const msg =
-      l == Language.ENGLISH ? row.ENGLISH : `${row[lang]} \n\n(${row.ENGLISH})`;
+    let msg: string;
+
+    if (l === Language.ENGLISH) {
+      msg = printKdrString(row, Language.ENGLISH);
+    } else {
+      msg = printKdrString(row, l);
+
+      if (row.ENGLISH !== '') {
+        msg += `\n\n(${printKdrString(row, Language.ENGLISH)})`;
+      }
+    }
 
     return message.channel.send(msg);
   },

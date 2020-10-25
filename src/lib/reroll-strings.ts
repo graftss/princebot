@@ -3,13 +3,13 @@ import { DATA, getCsvData } from './get-data';
 
 export interface KDRStringRow {
   TEXT_ID: string;
-  SPEAKER?: string;
-  JAPANESE?: string;
-  ENGLISH?: string;
-  FRENCH?: string;
-  GERMAN?: string;
-  ITALIAN?: string;
-  SPANISH?: string;
+  SPEAKER: string;
+  JAPANESE: string;
+  ENGLISH: string;
+  FRENCH: string;
+  GERMAN: string;
+  ITALIAN: string;
+  SPANISH: string;
 }
 
 export enum Language {
@@ -21,13 +21,6 @@ export enum Language {
   SPANISH,
 }
 
-export interface KDRString {
-  TEXT_ID: string;
-  SPEAKER?: string;
-  LANGUAGE: Language;
-  VALUE: string;
-}
-
 export enum Speaker {
   King,
   Mutsuo,
@@ -37,6 +30,17 @@ export enum Speaker {
   News,
 }
 
+type LanguageIndex = Record<Language, number[]>;
+
+const englishSpeakers: Record<string, string> = {
+  王様: 'King',
+  'ムツオ(息子)': 'Mutsuo',
+  'ミチル(娘)': 'Michiru',
+  母: 'Mother',
+  父: 'Father',
+  ニュース: 'News',
+};
+
 export interface StringDB {
   // returns a random string row with the language `l`
   randomString: (l: Language) => KDRStringRow;
@@ -44,8 +48,6 @@ export interface StringDB {
   // returns a random string row with the language `l` and a nonempty
   randomSpokenString: (l: Language) => KDRStringRow;
 }
-
-type LanguageIndex = Record<Language, number[]>;
 
 const langs = ['JAPANESE', 'ENGLISH', 'FRENCH', 'GERMAN', 'ITALIAN', 'SPANISH'];
 
@@ -61,6 +63,14 @@ export const parseLanguage = (s: string): Language | undefined => {
   return undefined;
 };
 
+export const printKdrString = (s: KDRStringRow, l: Language): string => {
+  const lang = langStr(l);
+  const speakerStr =
+    l === Language.ENGLISH ? englishSpeakers[s.SPEAKER] : s.SPEAKER;
+
+  return s.SPEAKER !== '' ? `"${s[lang]}" -${speakerStr}` : s[lang];
+};
+
 /*
 const rowToStr = (row: KDRStringRow, l: Language): KDRString => ({
   TEXT_ID: row.TEXT_ID,
@@ -68,15 +78,6 @@ const rowToStr = (row: KDRStringRow, l: Language): KDRString => ({
   LANGUAGE: l,
   VALUE: row[langStr(l)],
 });
-
-const speakers: Record<string, Speaker> = {
-  '王様': Speaker.King,
-  'ムツオ(息子)': Speaker.Mutsuo,
-  'ミチル(娘)': Speaker.Michiru,
-  '母': Speaker.Mother,
-  '父': Speaker.Father,
-  'ニュース': Speaker.News,
-};
 */
 
 // mutates the KDRStringRow
@@ -119,8 +120,6 @@ const buildStringDb = (): StringDB => {
   const spokenLanguageIndex: LanguageIndex = buildLanguageIndex(spokenStrings);
 
   return {
-    randomRow: (): KDRStringRow => sample(strings) as KDRStringRow,
-
     randomString: (l: Language) => {
       const lang = langStr(l);
       return strings[sample(languageIndex[lang])];
