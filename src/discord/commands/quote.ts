@@ -15,6 +15,8 @@ const parseLangFromArgs = (args: string[]): Language => {
 };
 
 export const command: Command = {
+  cooldown: 300,
+
   match(message: Discord.Message): boolean {
     return message.content.startsWith('.quote');
   },

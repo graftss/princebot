@@ -1,7 +1,7 @@
 import path from 'path';
 import Discord from 'discord.js';
 import { auth } from '../auth';
-import { loadCommandsFromDir } from './Command';
+import { loadCommandsFromDir, Command } from './Command';
 import { PersistentState } from './PersistentState';
 
 interface ClientConfig {
@@ -14,10 +14,32 @@ const config: ClientConfig = {
   commandsDir: path.join(__dirname, 'commands'),
 };
 
+class CooldownManager {
+  private cooldowns: Set<Command> = new Set();
+
+  onCooldown(command: Command): boolean {
+    return this.cooldowns.has(command);
+  }
+
+  // if the command is on cooldown, returns false
+  // otherwise, returns true and puts the command on cooldown
+  runCommand(command: Command): boolean {
+    if (this.cooldowns.has(command)) return false;
+
+    if (command.cooldown !== undefined) {
+      this.cooldowns.add(command);
+      setTimeout(() => this.cooldowns.delete(command), command.cooldown * 1000);
+    }
+
+    return true;
+  }
+}
+
 export const createDiscordBot = (): Promise<string> => {
   const client = new Discord.Client();
   const commands = loadCommandsFromDir(config.commandsDir);
   const state: PersistentState<any> = new PersistentState(config.statePath);
+  const cooldownManager: CooldownManager = new CooldownManager();
 
   client.once('ready', () => {
     commands.forEach(command => {
@@ -29,7 +51,13 @@ export const createDiscordBot = (): Promise<string> => {
 
   client.on('message', message => {
     commands.forEach(command => {
-      if (command.match && command.handle && command.match(message)) {
+      if (
+        command.match &&
+        command.handle &&
+        command.match(message) &&
+        !cooldownManager.onCooldown(command)
+      ) {
+        cooldownManager.runCommand(command);
         command.handle(message);
       }
     });
