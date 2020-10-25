@@ -8,6 +8,9 @@ export interface Command {
     message: Discord.Message,
   ) => Promise<Discord.Message | Discord.Message[]>;
   onReady?: (client: Discord.Client, state: any) => void;
+
+  // cooldown on the command triggering (in seconds)
+  cooldown?: number;
 }
 
 export const loadCommandsFromDir = (dir: string): Command[] =>

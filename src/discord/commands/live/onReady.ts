@@ -67,10 +67,12 @@ const filterLiveUpdate = (isGameWhitelisted: (game: string) => boolean) => (
 
 const sample = (arr): any => arr[Math.floor(Math.random() * arr.length)];
 
+/*
 const retired = [
   '<:cartLady:606338985706651688>',
   '<:pogHam:611584211660439552>',
 ];
+*/
 
 const emotes = [
   '<:babyCow:625343020702629889>',
