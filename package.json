@@ -36,6 +36,7 @@
     "discord-test": "set NODE_ENV=development&& npm run discord",
     "twitch": "node build/twitch/index.js",
     "twitch-test": "set NODE_ENV=development&& npm run twitch",
+    "start": "node build/index.js",
     "watch": "tsc --watch"
   }
 }
