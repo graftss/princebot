@@ -17,7 +17,7 @@ const commands: T.Command[] = [
 export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
     identity: auth.twitchChat,
-    channels: ['#randomizerhater92'],
+    channels: ['#randomizerhater92', '#dunewacky'],
   };
 
   const client = tmi.Client(options);
