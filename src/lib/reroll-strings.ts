@@ -132,4 +132,36 @@ const buildStringDb = (): StringDB => {
   };
 };
 
-export const stringDb: StringDB = buildStringDb();
+const stringDb: StringDB = buildStringDb();
+
+const parseLangFromArgs = (args: string[]): Language => {
+  if (args.length < 2) return Language.ENGLISH;
+  const l = parseLanguage(args[1]);
+  return l == undefined ? Language.ENGLISH : l;
+};
+
+export const matchQuoteCommand = (text: string): boolean =>
+  text.startsWith('!quote');
+
+export const handleQuoteCommand = (text: string): string => {
+  const args = text.split(/\s+/);
+
+  const l: Language = parseLangFromArgs(args);
+  const row: KDRStringRow = text.startsWith('!quote')
+    ? stringDb.randomSpokenString(l)
+    : stringDb.randomString(l);
+
+  let msg: string;
+
+  if (l === Language.ENGLISH) {
+    msg = printKdrString(row, Language.ENGLISH);
+  } else {
+    msg = printKdrString(row, l);
+
+    if (row.ENGLISH !== '') {
+      msg += `\n\n(${printKdrString(row, Language.ENGLISH)})`;
+    }
+  }
+
+  return msg;
+};

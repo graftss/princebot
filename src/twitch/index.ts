@@ -5,8 +5,14 @@ import { mongodbConnect } from './mongodb';
 import { handleSocials } from './commands/socials';
 import { handleAdd } from './commands/pp-add';
 import { handlePull } from './commands/pp-pull';
+import { handleQuote } from './commands/quote';
 
-const commands: T.Command[] = [handleAdd, handlePull, handleSocials];
+const commands: T.Command[] = [
+  handleAdd,
+  handlePull,
+  handleSocials,
+  handleQuote,
+];
 
 export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
