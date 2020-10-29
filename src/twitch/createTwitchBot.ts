@@ -6,12 +6,14 @@ import { handleSocials } from './commands/socials';
 import { handleAdd } from './commands/pp-add';
 import { handlePull } from './commands/pp-pull';
 import { handleQuote } from './commands/quote';
+import { handleObject } from './commands/object';
 
 const commands: T.Command[] = [
   handleAdd,
   handlePull,
   handleSocials,
   handleQuote,
+  handleObject,
 ];
 
 export const createTwitchBot = (): Promise<[string, number]> => {

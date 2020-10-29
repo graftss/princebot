@@ -1,4 +1,4 @@
-import { sample, zipObject } from 'lodash';
+import { find, random, sample, zipObject } from 'lodash';
 import { DATA, getCsvData } from './get-data';
 
 export interface KDRStringRow {
@@ -41,12 +41,20 @@ const englishSpeakers: Record<string, string> = {
   ニュース: 'News',
 };
 
+export interface KDRObject {
+  name: KDRStringRow;
+  description?: KDRStringRow;
+}
+
 export interface StringDB {
   // returns a random string row with the language `l`
   randomString: (l: Language) => KDRStringRow;
 
   // returns a random string row with the language `l` and a nonempty
   randomSpokenString: (l: Language) => KDRStringRow;
+
+  // returns two string rows corresponding to a random object's name and description
+  randomObject: () => KDRObject;
 }
 
 const langs = ['JAPANESE', 'ENGLISH', 'FRENCH', 'GERMAN', 'ITALIAN', 'SPANISH'];
@@ -129,6 +137,19 @@ const buildStringDb = (): StringDB => {
       const lang = langStr(l);
       return spokenStrings[sample(spokenLanguageIndex[lang])];
     },
+
+    randomObject: (): KDRObject => {
+      const objectIdx = random(1718)
+        .toString()
+        .padStart(4, '0');
+      const nameId = 'OT_OBJ_' + objectIdx;
+      const descId = 'OT_CMM_' + objectIdx;
+
+      return {
+        name: find(strings, s => s.TEXT_ID === nameId),
+        description: find(strings, s => s.TEXT_ID === descId),
+      } as KDRObject;
+    },
   };
 };
 
@@ -161,6 +182,32 @@ export const handleQuoteCommand = (text: string): string => {
     if (row.ENGLISH !== '') {
       msg += `\n\n(${printKdrString(row, Language.ENGLISH)})`;
     }
+  }
+
+  return msg;
+};
+
+const printKdrObject = (obj: KDRObject, l: Language): string => {
+  const name = printKdrString(obj.name, l);
+  const desc = obj.description ? printKdrString(obj.description, l) : '???';
+
+  return `${name}: ${desc}`;
+};
+
+export const matchObjectCommand = (text: string): boolean =>
+  text.startsWith('!object');
+
+export const handleObjectCommand = (text: string): string => {
+  const args = text.split(/\s+/);
+
+  const l: Language = parseLangFromArgs(args);
+  const obj: KDRObject = stringDb.randomObject();
+
+  const engStr = printKdrObject(obj, Language.ENGLISH);
+  let msg: string = engStr;
+
+  if (l !== Language.ENGLISH) {
+    msg = printKdrObject(obj, l) + ` \n\n(${engStr})`;
   }
 
   return msg;
