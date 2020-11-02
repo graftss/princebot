@@ -46,7 +46,8 @@ const prodConfig: NotificationConfig = {
   isGameWhitelisted: (game: string): boolean =>
     game.includes('katamari') ||
     game.includes('turbo turtle adventure') ||
-    game.includes('wattam'),
+    game.includes('wattam') ||
+    game.includes('the wonderful end of the world'),
   query: {
     usernames: [
       'cherry_soup',
