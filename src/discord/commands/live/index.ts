@@ -1,5 +1,6 @@
 import { Command } from '../../Command';
 import { onReady, NotificationConfig } from './onReady';
+import { chestEmotes, katamariEmotes, slots } from './slots';
 
 const testConfig: NotificationConfig = {
   guildId: '572531842952200223',
@@ -14,9 +15,12 @@ const testConfig: NotificationConfig = {
       'ickyy',
       'vektroidlive',
       'tempest_fox',
+      'kittyloafers',
     ],
   },
   persist: false,
+
+  getFlavor: () => slots(chestEmotes, 20),
 };
 
 const chestConfig: NotificationConfig = {
@@ -37,9 +41,11 @@ const chestConfig: NotificationConfig = {
       'rrifff',
     ],
   },
+
+  getFlavor: () => slots(chestEmotes, 5),
 };
 
-const prodConfig: NotificationConfig = {
+const katamariConfig: NotificationConfig = {
   guildId: '232268612285497345',
   channelId: '535643965899276289',
   updateInterval: 60 * 1000,
@@ -79,6 +85,7 @@ const prodConfig: NotificationConfig = {
       'theterrifictracy',
     ],
   },
+  getFlavor: () => slots(katamariEmotes, 5),
 };
 
 export const command: Command = {
@@ -86,7 +93,7 @@ export const command: Command = {
     if (process.env.NODE_ENV === 'development') {
       onReady(client, testConfig);
     } else {
-      onReady(client, prodConfig);
+      onReady(client, katamariConfig);
       onReady(client, chestConfig);
     }
   },

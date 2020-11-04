@@ -65,44 +65,37 @@ const filterLiveUpdate = (isGameWhitelisted: (game: string) => boolean) => (
     stream => stream.game && isGameWhitelisted(stream.game.toLowerCase()),
   );
 
-const sample = (arr): any => arr[Math.floor(Math.random() * arr.length)];
-
-/*
-const retired = [
-  '<:cartLady:606338985706651688>',
-  '<:pogHam:611584211660439552>',
-];
-*/
-
-const emotes = [
-  '<:babyCow:625343020702629889>',
-  '<:dogLuck:606340486206193714>',
-  '<:scuffed:609557151685279805>',
-  '<:pogRan:714295923320291361>',
-  '<:SwagBoat:714548717390266478>',
-];
-
-const slots = (): any => [1, 2, 3, 4, 5].map(() => sample(emotes)).join(' ');
-
 const twitchUrl = (stream: LiveStreamInfo): string =>
   `https://www.twitch.tv/${stream.username}`;
 
-const embedStreamInfo = (stream: LiveStreamInfo): Discord.RichEmbed =>
-  new Discord.RichEmbed()
+const embedStreamInfo = (
+  stream: LiveStreamInfo,
+  flavor?: string,
+): Discord.RichEmbed => {
+  const result = new Discord.RichEmbed()
     .setURL(twitchUrl(stream))
     .setAuthor(`${stream.username} is live!`)
     .setTitle(stream.title)
     .setDescription(`playing ${stream.game}`)
-    .addField('\u200b', slots())
     .setColor('#7289da')
     .setThumbnail(stream.avatarUrl)
     .setTimestamp();
 
+  if (flavor !== undefined) result.addField('\u200b', flavor);
+
+  return result;
+};
+
 type Sender = (msg: string, embed: Discord.RichEmbed) => any;
 
-const sendLiveUpdate = (send: Sender, update: LiveUpdate): void => {
+const sendLiveUpdate = (
+  send: Sender,
+  update: LiveUpdate,
+  getFlavor?: () => string,
+): void => {
   update.forEach((stream: LiveStreamInfo) => {
-    send(`now live: ${twitchUrl(stream)}`, embedStreamInfo(stream));
+    const flavor = getFlavor && getFlavor();
+    send(`now live: ${twitchUrl(stream)}`, embedStreamInfo(stream, flavor));
   });
 };
 
@@ -121,6 +114,7 @@ export interface NotificationConfig {
   query: StreamQuery;
   isGameWhitelisted?: (game: string) => boolean;
   persist?: boolean;
+  getFlavor?: () => string;
 }
 
 export const onReady = (
@@ -143,7 +137,7 @@ export const onReady = (
 
   const update = (): void => {
     poller.pollLiveStreams(query).then(liveUpdate => {
-      sendLiveUpdate(send, liveUpdate);
+      sendLiveUpdate(send, liveUpdate, config.getFlavor);
     });
   };
 
