@@ -47,6 +47,10 @@ export interface KDRObject {
 }
 
 export interface StringDB {
+  strings: KDRStringRow[];
+
+  getString: (id: string, l: Language) => string | undefined;
+
   // returns a random string row with the language `l`
   randomString: (l: Language) => KDRStringRow;
 
@@ -119,6 +123,14 @@ const buildStringDb = (): StringDB => {
     // filter out empty strings
     .filter(isNonemptyString);
 
+  const stringHash: Record<string, KDRStringRow> = strings.reduce(
+    (res, row) => {
+      res[row.TEXT_ID] = row;
+      return res;
+    },
+    {},
+  );
+
   // remove formatting codes
   strings.forEach(removeCodes);
 
@@ -128,6 +140,13 @@ const buildStringDb = (): StringDB => {
   const spokenLanguageIndex: LanguageIndex = buildLanguageIndex(spokenStrings);
 
   return {
+    strings,
+
+    getString: (id: string, l: Language) => {
+      const row = stringHash[id];
+      return row && row[langStr(l)];
+    },
+
     randomString: (l: Language) => {
       const lang = langStr(l);
       return strings[sample(languageIndex[lang])];
@@ -153,7 +172,7 @@ const buildStringDb = (): StringDB => {
   };
 };
 
-const stringDb: StringDB = buildStringDb();
+export const stringDb: StringDB = buildStringDb();
 
 const parseLangFromArgs = (args: string[]): Language => {
   if (args.length < 2) return Language.ENGLISH;
