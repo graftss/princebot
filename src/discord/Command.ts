@@ -6,7 +6,7 @@ export interface Command {
   match?: (message: Discord.Message) => boolean;
   handle?: (
     message: Discord.Message,
-  ) => Promise<Discord.Message | Discord.Message[]>;
+  ) => Maybe<Promise<Discord.Message | Discord.Message[]>>;
   onReady?: (client: Discord.Client, state: any) => void;
 
   // cooldown on the command triggering (in seconds)
