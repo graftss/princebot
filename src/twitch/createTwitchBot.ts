@@ -8,6 +8,7 @@ import { handlePull } from './commands/pp-pull';
 import { handleQuote } from './commands/quote';
 import { handleObject } from './commands/object';
 import { handleSong } from './commands/song';
+import { handleSize } from './commands/size';
 
 const commands: T.Command[] = [
   handleAdd,
@@ -16,6 +17,7 @@ const commands: T.Command[] = [
   handleQuote,
   handleObject,
   handleSong,
+  handleSize,
 ];
 
 export const createTwitchBot = (): Promise<[string, number]> => {

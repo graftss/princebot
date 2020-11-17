@@ -1,4 +1,4 @@
-import { chain, flatMap, sample } from 'lodash';
+import { chain, flatMap, sample, zip, sortBy, uniqBy } from 'lodash';
 import levenshtein from 'fast-levenshtein';
 import { parseLanguage, stringDb, Language } from './reroll-strings';
 import { DATA, getCsvData } from './get-data';
@@ -26,6 +26,11 @@ export interface ObjectCommandResult {
   object: KDRObject;
   filter: Maybe<ObjectFilter>;
   searchIgnored: boolean;
+  primaryLanguage: Language;
+}
+
+export interface SizeCommandResult {
+  objects: KDRObject[];
   primaryLanguage: Language;
 }
 
@@ -97,6 +102,19 @@ const closestMatchIndex = (
   return result;
 };
 
+// ** assumes query is pre-normalized to be lower case **
+// returns the edit distance between the object's name in the given language
+// and the search query, if the object has such a name.
+// if the object doesn't have a name in that language, returns undefined
+const objectNameDistance = (object: KDRObject, query: string, l: Language): Maybe<number> => {
+  if (!object.nameStrId) return undefined;
+
+  let objName  = stringDb.getString(object.nameStrId, l);
+  if (!objName) return undefined;
+
+  return levenshtein.get(objName.toLowerCase(), query);
+};
+
 const definedValues = (objectList: KDRObject[], key: string): string[] =>
   chain(objectList)
     .map(key)
@@ -130,6 +148,60 @@ class KDRObjectDb {
       ['categoryStrId', 'locationStrId', 'sizeStrId'],
       key => definedValues(this.objectList, key),
     );
+  }
+
+  // returns the list of objects whose name contains the query as a substring
+  objectNamesWithSubstring(query: string, l: Language): KDRObject[] {
+    query = query.toLowerCase().replace(/\s+/g, ' ');
+
+    return this.objectList.filter(obj => {
+      const name = obj.nameStrId && stringDb.getString(obj.nameStrId, l);
+      return name && name.toLowerCase().includes(query);
+    });
+  }
+
+  // returns a list of objects whose names match the query
+  objectNameMatches(query: string, l: Language, maxResults: number): KDRObject[] {
+    let result: KDRObject[] = [];
+    const maxEditDistance = 2;
+
+    // normalize the query
+    query = query.toLowerCase().replace(/\s+/g, ' ');
+
+    const nameDistances = zip(
+      this.objectList,
+      this.objectList.map(obj => objectNameDistance(obj, query, l)),
+    ).filter(pair => pair[1] !== undefined && pair[1] <= maxEditDistance);
+
+    if (nameDistances.length > 0) {
+      let sortedNameDistances = sortBy(nameDistances, ['1']);
+
+      // if there's an name exactly matching the query, remove objects
+      // from result set with a nonzero edit distance.
+      const foundExactMatch = sortedNameDistances[0][1] === 0;
+      if (foundExactMatch) {
+        sortedNameDistances = sortedNameDistances.filter(pair => pair[1] === 0);
+      }
+
+      result = sortedNameDistances.map(pair => pair[0]) as KDRObject[];
+    }
+
+    // pad the result set with substring matches
+    return result
+      .concat(this.objectNamesWithSubstring(query, l))
+      .slice(0, maxResults);
+  }
+
+  objectSizeQuery(query: string, l: Language, maxResults: number): KDRObject[] {
+    const matches = this.objectNameMatches(query, l, maxResults)
+      .filter(obj => obj.isCollectible && obj.pickupSize !== undefined);
+
+    return uniqBy(matches, obj => {
+      const name = stringDb.getString(obj.nameStrId as string, l);
+      const nameTag = obj.nameTag;
+      const size = obj.pickupSize as number;
+      return name + ';' + nameTag + ';' + size;
+    });
   }
 
   randomObjectQuery(l: Language, query: string): ObjectCommandResult {
@@ -197,29 +269,44 @@ class KDRObjectDb {
 
 const db = new KDRObjectDb();
 
-const objectCommandTypes: string[] = ['!object'];
+// remove (optional) language argument from argument array, if it exists
+const parseLanguageArg = (args: string[]): Language => {
+  const parsedLang: Maybe<Language> = parseLanguage(args[0] || '');
+
+  if (parsedLang !== undefined) {
+    args.shift();
+    return parsedLang;
+  }
+
+  return Language.ENGLISH;
+};
 
 export const matchObjectCommand = (command: string): boolean =>
-  objectCommandTypes.some(commandType => command.startsWith(commandType));
+  command.startsWith('!object');
 
 export const handleObjectCommand = (
   command: string,
 ): Maybe<ObjectCommandResult> => {
   const args = command.split(/\s+/);
+  args.shift();
+  const lang = parseLanguageArg(args);
 
-  // remove command type argument
-  const commandType = args.shift() as string;
+  // use remaining command as query and return result
+  const query = args.join(' ');
+  return db.randomObjectQuery(lang, query);
+};
 
-  // remove (optional) language type argument, if it exists
-  const parsedLang: Maybe<Language> = parseLanguage(args[0] || '');
-  const lang: Language =
-    parsedLang === undefined ? Language.ENGLISH : parsedLang;
-  if (parsedLang !== undefined) args.shift();
+export const matchSizeCommand = (command: string): boolean =>
+  command.startsWith('!size');
 
-  switch (commandType) {
-    case '!object': {
-      const query = args.join(' ');
-      return db.randomObjectQuery(lang, query);
-    }
-  }
+export const handleSizeCommand = (command: string): SizeCommandResult => {
+  const args = command.split(/\s+/);
+  args.shift();
+  const lang = parseLanguageArg(args);
+  const query = args.join(' ');
+
+  return {
+    objects: db.objectSizeQuery(query, lang, 10),
+    primaryLanguage: lang,
+  };
 };
