@@ -23,7 +23,7 @@ export const handleSize: Command = (client, message) => {
 
   for (var i = 0; i < objects.length; i++) {
     response += renderObject(objects[i], primaryLanguage);
-    if (response.length > 200) break;
+    if (response.length > 300) break;
     response += ' ';
   }
 

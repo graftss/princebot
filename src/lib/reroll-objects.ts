@@ -163,7 +163,7 @@ class KDRObjectDb {
   // returns a list of objects whose names match the query
   objectNameMatches(query: string, l: Language, maxResults: number): KDRObject[] {
     let result: KDRObject[] = [];
-    const maxEditDistance = 2;
+    const maxEditDistance = query.length <= 5 ? 1 : 2;
 
     // normalize the query
     query = query.toLowerCase().replace(/\s+/g, ' ');
@@ -187,8 +187,8 @@ class KDRObjectDb {
     }
 
     // pad the result set with substring matches
-    return result
-      .concat(this.objectNamesWithSubstring(query, l))
+    return this.objectNamesWithSubstring(query, l)
+      .concat(result)
       .slice(0, maxResults);
   }
 
