@@ -10,7 +10,7 @@ import { Language, stringDb } from '../../lib/reroll-strings';
 const renderObject = (object: KDRObject, l: Language): string => {
   const name = stringDb.getString(object.nameStrId as string, l) as string;
   const size = pickupSizeToString(object.pickupSize as number);
-  return `(${name}: ${size})`;
+  return `${name}: ${size}`;
 };
 
 export const handleSize: Command = (client, message) => {
@@ -23,11 +23,11 @@ export const handleSize: Command = (client, message) => {
 
   for (var i = 0; i < objects.length; i++) {
     response += renderObject(objects[i], primaryLanguage);
-    if (response.length > 300) {
-      response += `(${(objects.length - i - 1)} objects hidden)`;
+    if (response.length > 360) {
+      response += ` (${(objects.length - i - 1)} objects hidden)`;
       break;
     }
-    response += ' ';
+    response += ' | ';
   }
 
   if (response !== '') client.say(channel, response);
