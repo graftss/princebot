@@ -27,7 +27,7 @@ export const handleSize: Command = (client, message) => {
       response += ` (${(objects.length - i - 1)} objects hidden)`;
       break;
     }
-    response += ' | ';
+    if (i < objects.length - 1) response += ' | ';
   }
 
   if (response !== '') client.say(channel, response);
