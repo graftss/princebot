@@ -83,6 +83,7 @@ const katamariConfig: NotificationConfig = {
       'shamana',
       'sisuka7',
       'theterrifictracy',
+      'xainjaya',
     ],
   },
   getFlavor: () => slots(katamariEmotes, 5),
