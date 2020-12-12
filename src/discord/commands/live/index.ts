@@ -63,6 +63,7 @@ const katamariConfig: NotificationConfig = {
       'enzor_au',
       'euclid999',
       'forginal',
+      'garbitheglitcheress',
       'harutomo',
       'hotdogturtle',
       'italyflecktarn',
