@@ -11,13 +11,18 @@ import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
 
 const commands: T.Command[] = [
+  handleQuote,
+  handleObject,
+  handleSize,
+];
+
+const myChannel = '#randomizerhater92';
+
+const myCommands: T.Command[] = [
   handleAdd,
   handlePull,
   handleSocials,
-  handleQuote,
-  handleObject,
   handleSong,
-  handleSize,
 ];
 
 export const createTwitchBot = (): Promise<[string, number]> => {
@@ -38,7 +43,13 @@ export const createTwitchBot = (): Promise<[string, number]> => {
       sender: tags['display-name'],
     };
 
-    commands.forEach(cmd => cmd(client, message, tags));
+    const runCommand = cmd => cmd(client, message, tags);
+
+    commands.forEach(runCommand);
+
+    if (message.channel === myChannel) {
+      myCommands.forEach(runCommand);
+    }
   });
 
   mongodbConnect().catch(e => console.log('mongod error', e));
