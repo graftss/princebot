@@ -66,6 +66,7 @@ const katamariConfig: NotificationConfig = {
       'garbitheglitcheress',
       'harutomo',
       'hotdogturtle',
+      'inightfall',
       'italyflecktarn',
       'jokopoking',
       'journeymanb',
