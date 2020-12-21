@@ -106,10 +106,14 @@ const closestMatchIndex = (
 // returns the edit distance between the object's name in the given language
 // and the search query, if the object has such a name.
 // if the object doesn't have a name in that language, returns undefined
-const objectNameDistance = (object: KDRObject, query: string, l: Language): Maybe<number> => {
+const objectNameDistance = (
+  object: KDRObject,
+  query: string,
+  l: Language,
+): Maybe<number> => {
   if (!object.nameStrId) return undefined;
 
-  let objName  = stringDb.getString(object.nameStrId, l);
+  const objName = stringDb.getString(object.nameStrId, l);
   if (!objName) return undefined;
 
   return levenshtein.get(objName.toLowerCase(), query);
@@ -141,8 +145,7 @@ class KDRObjectDb {
   private searchTermIds: string[];
 
   constructor() {
-    this.objectList = getCsvData(DATA.REROLL_OBJECTS)
-      .map(parseNonstringFields);
+    this.objectList = getCsvData(DATA.REROLL_OBJECTS).map(parseNonstringFields);
 
     this.searchTermIds = flatMap(
       ['categoryStrId', 'locationStrId', 'sizeStrId'],
@@ -161,7 +164,11 @@ class KDRObjectDb {
   }
 
   // returns a list of objects whose names match the query
-  objectNameMatches(query: string, l: Language, maxResults: number): KDRObject[] {
+  objectNameMatches(
+    query: string,
+    l: Language,
+    maxResults: number,
+  ): KDRObject[] {
     let result: KDRObject[] = [];
     const maxEditDistance = query.length <= 5 ? 1 : 2;
 
@@ -193,8 +200,9 @@ class KDRObjectDb {
   }
 
   objectSizeQuery(query: string, l: Language, maxResults: number): KDRObject[] {
-    const matches = this.objectNameMatches(query, l, maxResults)
-      .filter(obj => obj.isCollectible && obj.pickupSize !== undefined);
+    const matches = this.objectNameMatches(query, l, maxResults).filter(
+      obj => obj.isCollectible && obj.pickupSize !== undefined,
+    );
 
     return uniqBy(matches, obj => {
       const name = stringDb.getString(obj.nameStrId as string, l);

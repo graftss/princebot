@@ -21,10 +21,10 @@ export const handleSize: Command = (client, message) => {
   const { primaryLanguage, objects } = handleSizeCommand(text);
   let response = '';
 
-  for (var i = 0; i < objects.length; i++) {
+  for (let i = 0; i < objects.length; i++) {
     response += renderObject(objects[i], primaryLanguage);
     if (response.length > 360) {
-      response += ` (${(objects.length - i - 1)} objects hidden)`;
+      response += ` (${objects.length - i - 1} objects hidden)`;
       break;
     }
     if (i < objects.length - 1) response += ' | ';

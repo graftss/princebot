@@ -10,11 +10,7 @@ import { handleObject } from './commands/object';
 import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
 
-const commands: T.Command[] = [
-  handleQuote,
-  handleObject,
-  handleSize,
-];
+const commands: T.Command[] = [handleQuote, handleObject, handleSize];
 
 const myChannel = '#randomizerhater92';
 
@@ -28,7 +24,14 @@ const myCommands: T.Command[] = [
 export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
     identity: auth.twitchChat,
-    channels: ['#randomizerhater92', '#dunewacky', '#martini', '#enzor_au', '#shamana'],
+    channels: [
+      '#randomizerhater92',
+      '#dunewacky',
+      '#martini',
+      '#enzor_au',
+      '#shamana',
+      '#forginal',
+    ],
   };
 
   const client = tmi.Client(options);
