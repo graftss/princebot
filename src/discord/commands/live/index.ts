@@ -56,6 +56,7 @@ const katamariConfig: NotificationConfig = {
     game.includes('the wonderful end of the world'),
   query: {
     usernames: [
+      'boulder1145',
       'cherry_soup',
       'csaur',
       'devteamster',
