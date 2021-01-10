@@ -6,7 +6,7 @@ import { DATA, getCsvData } from './get-data';
 export interface KDRObject {
   englishName: string;
   monoNameIndex: number;
-  pickupSize?: number;
+  pickupSize?: number; // integer (mm)
   internalName: string;
   nameTag: string;
   nameStrId?: string;
@@ -18,8 +18,10 @@ export interface KDRObject {
   isCollectible: boolean;
   isRare: boolean;
   ignoresHole: boolean;
-  volume: number;
+  volume: number; // float (m^3)
   isCountry: boolean;
+  pickupVolumePenalty?: number;
+  pickupVolume?: number; // float (m^3)
 }
 
 export interface ObjectCommandResult {
@@ -38,9 +40,17 @@ const parseNonstringFields = (obj: any): KDRObject => {
   obj.monoNameIndex = parseInt(obj.monoNameIndex);
   obj.pickupSize = parseInt(obj.pickupSize);
   obj.volume = parseFloat(obj.volume);
+  obj.pickupVolumePenalty = parseFloat(obj.pickupVolumePenalty);
+  obj.pickupVolume = parseFloat(obj.pickupVolume);
 
   // delete NaN fields
-  ['monoNameIndex', 'pickupSize', 'volume'].forEach(key => {
+  [
+    'monoNameIndex',
+    'pickupSize',
+    'volume',
+    'pickupVolume',
+    'pickupVolumePenalty',
+  ].forEach(key => {
     if (obj[key] !== obj[key]) delete obj[key];
   });
 
@@ -194,8 +204,8 @@ class KDRObjectDb {
     }
 
     // pad the result set with substring matches
-    return this.objectNamesWithSubstring(query, l)
-      .concat(result)
+    return result
+      .concat(this.objectNamesWithSubstring(query, l))
       .slice(0, maxResults);
   }
 
@@ -275,7 +285,7 @@ class KDRObjectDb {
   }
 }
 
-const db = new KDRObjectDb();
+export const db = new KDRObjectDb();
 
 // remove (optional) language argument from argument array, if it exists
 const parseLanguageArg = (args: string[]): Language => {

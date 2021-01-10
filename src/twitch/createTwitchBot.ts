@@ -46,7 +46,7 @@ export const createTwitchBot = (): Promise<[string, number]> => {
       sender: tags['display-name'],
     };
 
-    const runCommand = cmd => cmd(client, message, tags);
+    const runCommand = (cmd): void => cmd(client, message, tags);
 
     commands.forEach(runCommand);
 

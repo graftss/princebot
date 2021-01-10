@@ -44,8 +44,6 @@ const objectEmbed = (objResult: ObjectCommandResult): Discord.RichEmbed => {
       .map(getString)
       .join(' / ') || empty;
 
-  console.log(object);
-
   const result = new Discord.RichEmbed()
     .setColor('#0099ff')
     .setTitle(title)
