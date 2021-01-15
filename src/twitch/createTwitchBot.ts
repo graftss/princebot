@@ -9,17 +9,21 @@ import { handleQuote } from './commands/quote';
 import { handleObject } from './commands/object';
 import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
+import { handleAddCommand } from './commands/addcommand';
 
 const commands: T.Command[] = [handleQuote, handleObject, handleSize];
 
-const myChannel = '#randomizerhater92';
+const nonglobalCommands: { [key: string]: T.Command[] } = {
+  '#randomizerhater92': [
+    handleAdd,
+    handlePull,
+    handleSocials,
+    handleSong,
+    handleAddCommand,
+  ],
 
-const myCommands: T.Command[] = [
-  handleAdd,
-  handlePull,
-  handleSocials,
-  handleSong,
-];
+  '#dunewacky': [handleAddCommand],
+};
 
 export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
@@ -50,8 +54,9 @@ export const createTwitchBot = (): Promise<[string, number]> => {
 
     commands.forEach(runCommand);
 
-    if (message.channel === myChannel) {
-      myCommands.forEach(runCommand);
+    const channelCommands = nonglobalCommands[message.channel];
+    if (channelCommands !== undefined) {
+      channelCommands.forEach(runCommand);
     }
   });
 

@@ -1,8 +1,8 @@
 import path from 'path';
 import Discord from 'discord.js';
 import { auth } from '../auth';
+import { PersistentState } from '../lib/PersistentState';
 import { loadCommandsFromDir, Command } from './Command';
-import { PersistentState } from './PersistentState';
 
 interface ClientConfig {
   statePath: string;

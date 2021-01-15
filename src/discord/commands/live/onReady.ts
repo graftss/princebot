@@ -1,6 +1,6 @@
 import path from 'path';
 import Discord from 'discord.js';
-import { PersistentState } from '../../PersistentState';
+import { PersistentState } from '../../../lib/PersistentState';
 import {
   LiveUpdate,
   StreamQuery,
