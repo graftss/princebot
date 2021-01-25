@@ -4,6 +4,7 @@ const sample = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const retired = [
   '<:cartLady:606338985706651688>',
   '<:pogHam:611584211660439552>',
+  '<:SwagBoat:714548717390266478>',
 ];
 */
 
@@ -12,7 +13,7 @@ export const katamariEmotes = [
   '<:dogLuck:606340486206193714>',
   '<:scuffed:609557151685279805>',
   '<:pogRan:714295923320291361>',
-  '<:SwagBoat:714548717390266478>',
+  '<:littleGhost:609505010572722176>',
 ];
 
 export const chestEmotes = [
