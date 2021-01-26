@@ -18,7 +18,7 @@ export const handleAddCommand: Command = (client, message) => {
 
   if (inOwnChannel) {
     if (text.startsWith('!newcommand ')) {
-      const match = text.match(/^!newcommand\s+(![^\s]+)\s+([^\s].+)$/);
+      const match = text.match(/^!newcommand\s+([^\s]+)\s+([^\s].+)$/);
       if (!match) return client.say(channel, `i dont understand sorry`);
       const [_, key, value] = match;
 
