@@ -77,7 +77,13 @@ export const getUserInfo = (usernames: string[]): Promise<UserInfo[]> => {
     qs: {
       login: usernames,
     },
-  }).then(res => res.data.map(extractUserInfo));
+  })
+    .then(res => res.data.map(extractUserInfo))
+    .then((userInfos: UserInfo[]): UserInfo[] => {
+      // order response to respect the order of `usernames`
+      const responseHash = _.keyBy(userInfos, 'username');
+      return usernames.map(username => responseHash[username]);
+    });
 };
 
 interface TwitchGameObject {

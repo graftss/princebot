@@ -16,8 +16,12 @@ const testConfig: NotificationConfig = {
       'vektroidlive',
       'tempest_fox',
       'kittyloafers',
+      'elorasaurus_gaming',
+      'amberlance0911',
+      'ceiling_dad',
     ],
   },
+  isGameWhitelisted: (game: string): boolean => game.includes('katamari'),
   persist: false,
 
   getFlavor: () => slots(chestEmotes, 20),
