@@ -179,11 +179,21 @@ class KDRObjectDb {
     l: Language,
     maxResults: number,
   ): KDRObject[] {
+    const nameTagRegex = /\s*\[\s*(\w+)\s*\]\s*$/;
+
     let result: KDRObject[] = [];
     const maxEditDistance = query.length <= 5 ? 1 : 2;
 
     // normalize the query
     query = query.toLowerCase().replace(/\s+/g, ' ');
+
+    // check for a name tag in the query
+    const nameTagMatch = query.match(nameTagRegex);
+    let nameTag: Maybe<string>;
+    if (nameTagMatch !== null) {
+      nameTag = nameTagMatch[1].toLowerCase();
+      query = query.replace(nameTagRegex, '');
+    }
 
     const nameDistances = zip(
       this.objectList,
@@ -201,6 +211,20 @@ class KDRObjectDb {
       }
 
       result = sortedNameDistances.map(pair => pair[0]) as KDRObject[];
+    }
+
+    if (nameTag !== undefined) {
+      // return the exact name tag match if one is found
+      const exactNameTagMatch = result.filter(
+        obj => obj.nameTag.toLowerCase() == nameTag,
+      );
+      if (exactNameTagMatch.length > 0) return exactNameTagMatch;
+
+      // otherwise, allow a typo. i don't know what i'm doing
+      result = result.filter(obj => {
+        if (!obj.nameTag) return false;
+        return levenshtein.get(obj.nameTag.toLowerCase(), nameTag) <= 1;
+      });
     }
 
     // pad the result set with substring matches

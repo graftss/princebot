@@ -602,9 +602,12 @@ const subtractObjectList = (
 };
 
 const printObjectListElement = (elt: ObjectListElement): string => {
-  return elt.obj === undefined
-    ? '?? (x0)'
-    : `${elt.obj.englishName} (x${elt.quantity})`;
+  if (elt.obj === undefined) return '??? (x0)';
+
+  const { nameTag, englishName } = elt.obj;
+
+  const nameTagStr = nameTag ? ` [${nameTag}] ` : '';
+  return `${englishName}${nameTagStr}(x${elt.quantity})`;
 };
 
 const printObjectList = (objList: ObjectListElement[]): string => {
