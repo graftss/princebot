@@ -689,10 +689,14 @@ const parseTargetSize = (str: string, lang: Language): Maybe<TargetSize> => {
 
   if (objMatches.length > 0) {
     const obj = objMatches[0];
+    const objName =
+      obj.nameTag === undefined
+        ? obj.englishName
+        : obj.englishName + ` [${obj.nameTag}]`;
 
     return {
       cm: (obj.pickupSize as number) / 10,
-      objName: obj.englishName,
+      objName,
     };
   }
 };

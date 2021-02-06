@@ -179,7 +179,7 @@ class KDRObjectDb {
     l: Language,
     maxResults: number,
   ): KDRObject[] {
-    const nameTagRegex = /\s*\[\s*(\w+)\s*\]\s*$/;
+    const nameTagRegex = /\s*\[\s*([\w\s]+)\s*\]\s*$/;
 
     let result: KDRObject[] = [];
     const maxEditDistance = query.length <= 5 ? 1 : 2;
