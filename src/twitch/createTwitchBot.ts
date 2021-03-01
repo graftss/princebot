@@ -11,7 +11,7 @@ import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
 import { handleAddCommand } from './commands/addcommand';
 
-const commands: T.Command[] = [handleQuote, handleObject, handleSize];
+const commands: T.Command[] = [handleSize];
 
 const nonglobalCommands: { [key: string]: T.Command[] } = {
   '#randomizerhater92': [
@@ -20,21 +20,24 @@ const nonglobalCommands: { [key: string]: T.Command[] } = {
     handleSocials,
     handleSong,
     handleAddCommand,
+    handleQuote,
+    handleObject,
   ],
 
-  '#dunewacky': [handleAddCommand],
+  '#dunewacky': [handleQuote, handleObject, handleAddCommand],
 };
 
 export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
     identity: auth.twitchChat,
     channels: [
-      '#randomizerhater92',
       '#dunewacky',
-      '#martini',
       '#enzor_au',
-      '#shamana',
       '#forginal',
+      '#martini',
+      '#odyssic',
+      '#randomizerhater92',
+      '#shamana',
     ],
   };
 
