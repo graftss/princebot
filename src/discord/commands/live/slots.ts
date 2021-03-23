@@ -5,6 +5,7 @@ const retired = [
   '<:cartLady:606338985706651688>',
   '<:pogHam:611584211660439552>',
   '<:SwagBoat:714548717390266478>',
+  '<:pogRan:714295923320291361>',
 ];
 */
 
@@ -12,8 +13,8 @@ export const katamariEmotes = [
   '<:babyCow:625343020702629889>',
   '<:dogLuck:606340486206193714>',
   '<:scuffed:609557151685279805>',
-  '<:pogRan:714295923320291361>',
   '<:littleGhost:609505010572722176>',
+  '<:pauseHam:791441155669491802>',
 ];
 
 export const chestEmotes = [
