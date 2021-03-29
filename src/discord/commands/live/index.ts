@@ -94,6 +94,7 @@ const katamariConfig: NotificationConfig = {
       'shamana',
       'sisuka7',
       'sunkir',
+      'the_mountain_fox',
       'theterrifictracy',
       'xainjaya',
     ],
