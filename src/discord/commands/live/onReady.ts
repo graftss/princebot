@@ -15,6 +15,8 @@ class StreamPoller {
   persist: boolean;
   persistentState: PersistentState<LiveState>;
   updateFilter: (l: LiveUpdate) => LiveUpdate;
+  maxOfflineUpdates: number = 5;
+  offlineUpdates: Record<string, number> = {};
 
   constructor(persistentStatePath?: string) {
     if (persistentStatePath !== undefined) {
@@ -32,13 +34,31 @@ class StreamPoller {
   // diffs `liveState` with `update`, and returns a `LiveUpdate` that contains
   // only new streams.
   updateLiveState(update: LiveUpdate): LiveUpdate {
-    const { liveState } = this;
+    const { liveState, maxOfflineUpdates, offlineUpdates } = this;
     const streams = this.updateFilter ? this.updateFilter(update) : update;
 
     // remove streams that have gone offline from the state
     for (const userId in liveState) {
-      if (streams.filter(s => s.userId === userId).length === 0) {
-        delete liveState[userId];
+      const userStream = streams.find(s => s.userId === userId);
+
+      // if an active stream has gone offline, increment its
+      // value in `offlineUpdates`.
+      if (userStream === undefined) {
+        if (offlineUpdates[userId] === undefined) {
+          offlineUpdates[userId] = 1;
+        } else {
+          offlineUpdates[userId] += 1;
+        }
+
+        // stream has reached the offline update cap; time to remove it
+        if (offlineUpdates[userId] > maxOfflineUpdates) {
+          delete liveState[userId];
+          delete offlineUpdates[userId];
+        }
+      } else {
+        // if an active stream is online, reset its value in
+        // `offlineUpdates` to 0.
+        offlineUpdates[userId] = 0;
       }
     }
 
