@@ -9,7 +9,7 @@
     "@types/tmi.js": "^1.4.2",
     "cheerio": "^1.0.0-rc.3",
     "csv": "^5.3.2",
-    "discord.js": "^11.5.1",
+    "discord.js": "12",
     "fast-levenshtein": "^3.0.0",
     "irc": "^0.5.2",
     "lodash": "^4.17.20",

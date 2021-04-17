@@ -91,8 +91,8 @@ const twitchUrl = (stream: LiveStreamInfo): string =>
 const embedStreamInfo = (
   stream: LiveStreamInfo,
   flavor?: string,
-): Discord.RichEmbed => {
-  const result = new Discord.RichEmbed()
+): Discord.MessageEmbed => {
+  const result = new Discord.MessageEmbed()
     .setURL(twitchUrl(stream))
     .setAuthor(`${stream.username} is live!`)
     .setTitle(stream.title)
@@ -106,7 +106,7 @@ const embedStreamInfo = (
   return result;
 };
 
-type Sender = (msg: string, embed: Discord.RichEmbed) => any;
+type Sender = (msg: string, embed: Discord.MessageEmbed) => any;
 
 const sendLiveUpdate = (
   send: Sender,
@@ -122,10 +122,14 @@ const sendLiveUpdate = (
 const getTargetChannel = (
   client: Discord.Client,
   config: NotificationConfig,
-): Discord.TextChannel =>
-  client.guilds
-    .find(g => g.id === config.guildId)
-    .channels.find(c => c.id === config.channelId) as Discord.TextChannel;
+): Maybe<Discord.TextChannel> => {
+  const guild = client.guilds
+    .resolve(config.guildId);
+
+  if (guild !== null) {
+    return guild.channels.resolve(config.channelId) as Discord.TextChannel;
+  }
+}
 
 export interface NotificationConfig {
   guildId: string;
@@ -149,6 +153,13 @@ export const onReady = (
 
   const poller = new StreamPoller(statePath);
   const channel = getTargetChannel(client, config);
+
+  // just give up if the channel doesn't exist
+  if (channel === undefined) {
+    console.log('channel undefined: ', config);
+    return;
+  }
+
   const send = (channel.send as Sender).bind(channel);
 
   poller.updateFilter = filterLiveUpdate(

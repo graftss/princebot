@@ -15,7 +15,7 @@ const empty = '\u200b';
 const maybeMap = (value: any, f: any = x => x): any =>
   value === undefined ? '???' : f(value);
 
-const objectEmbed = (objResult: ObjectCommandResult): Discord.RichEmbed => {
+const objectEmbed = (objResult: ObjectCommandResult): Discord.MessageEmbed => {
   const { filter, primaryLanguage: lang, object, searchIgnored } = objResult;
 
   const getString = (id): Maybe<string> => stringDb.getString(id, lang);
@@ -44,7 +44,7 @@ const objectEmbed = (objResult: ObjectCommandResult): Discord.RichEmbed => {
       .map(getString)
       .join(' / ') || empty;
 
-  const result = new Discord.RichEmbed()
+  const result = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle(title)
     .addField(sizeToRollUp, info);

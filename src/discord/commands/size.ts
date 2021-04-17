@@ -7,6 +7,7 @@ import {
   pickupSizeToString,
 } from '../../lib/reroll-objects';
 import { Language, stringDb } from '../../lib/reroll-strings';
+import { CHANNEL_IDS } from '..';
 
 const renderObject = (object: KDRObject, l: Language): string => {
   const name = stringDb.getString(object.nameStrId as string, l) as string;
@@ -16,7 +17,8 @@ const renderObject = (object: KDRObject, l: Language): string => {
 
 export const command: Command = {
   match(message: Discord.Message): boolean {
-    return matchSizeCommand(message.content);
+    return message.channel.id === CHANNEL_IDS.KD_BOTSPAM &&
+      matchSizeCommand(message.content);
   },
 
   handle(message: Discord.Message) {

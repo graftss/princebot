@@ -3,6 +3,7 @@ import Discord from 'discord.js';
 import { auth } from '../auth';
 import { PersistentState } from '../lib/PersistentState';
 import { loadCommandsFromDir, Command } from './Command';
+import { addReactionRoles } from './addReactionRoles';
 
 interface ClientConfig {
   statePath: string;
@@ -42,11 +43,14 @@ export const createDiscordBot = (): Promise<string> => {
   const cooldownManager: CooldownManager = new CooldownManager();
 
   client.once('ready', () => {
+    // run command `onReady` handlers
     commands.forEach(command => {
       if (command && command.onReady) {
         command.onReady(client, state);
       }
     });
+
+    // addReactionRoles(client);
   });
 
   client.on('message', message => {
