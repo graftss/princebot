@@ -1,7 +1,9 @@
 import Discord from 'discord.js';
 import { Command } from '../Command';
 import { matchCalcCommand, handleCalcCommand } from '../../lib/size-calc';
-import { CHANNEL_IDS } from '..';
+import { CHANNEL_IDS } from '../constants';
+
+console.log('hi');
 
 export const command: Command = {
   match(message: Discord.Message): boolean {

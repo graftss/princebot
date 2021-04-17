@@ -5,7 +5,7 @@ import {
   handleSizeCommand,
   renderObjectText,
 } from '../../lib/reroll-objects';
-import { CHANNEL_IDS } from '..';
+import { CHANNEL_IDS } from '../constants';
 
 export const command: Command = {
   match(message: Discord.Message): boolean {
