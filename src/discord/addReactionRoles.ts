@@ -14,13 +14,15 @@ const testReactionRole: ReactionRole = {
   messageID: '832161440864665640',
   emojiName: '😇',
   roleID: '832167679271108620',
-}
+};
 
 export const addReactionRoles = (client: Discord.Client): void => {
   // TODO: make this an argument
   const reactionRole = testReactionRole;
 
-  const channel: Discord.TextChannel = client.channels.resolve(reactionRole.channelID) as Discord.TextChannel;
+  const channel: Discord.TextChannel = client.channels.resolve(
+    reactionRole.channelID,
+  ) as Discord.TextChannel;
   const role = channel.guild.roles.resolve(reactionRole.roleID);
 
   if (role === null) {
@@ -35,17 +37,16 @@ export const addReactionRoles = (client: Discord.Client): void => {
       return;
     }
 
-    message.react('😇')
+    message.react('😇');
     const reactionCollector = new Discord.ReactionCollector(
       message,
       reaction => true || reaction.emoji.name === reactionRole.emojiName,
-      { dispose: true } as any
-    )
-    reactionCollector.on('collect', (reaction: Discord.MessageReaction, user) => {
-
-    });
-    reactionCollector.on('remove', (reaction, user) => {
-
-    });
+      { dispose: true } as any,
+    );
+    reactionCollector.on(
+      'collect',
+      (reaction: Discord.MessageReaction, user) => {},
+    );
+    reactionCollector.on('remove', (reaction, user) => {});
   });
 };

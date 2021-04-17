@@ -5,8 +5,10 @@ import { CHANNEL_IDS } from '..';
 
 export const command: Command = {
   match(message: Discord.Message): boolean {
-    return message.channel.id === CHANNEL_IDS.KD_BOTSPAM &&
-     matchCalcCommand(message.content);
+    return (
+      message.channel.id === CHANNEL_IDS.KD_BOTSPAM &&
+      matchCalcCommand(message.content)
+    );
   },
 
   handle(message: Discord.Message) {

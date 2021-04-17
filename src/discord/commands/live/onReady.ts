@@ -15,7 +15,7 @@ class StreamPoller {
   persist: boolean;
   persistentState: PersistentState<LiveState>;
   updateFilter: (l: LiveUpdate) => LiveUpdate;
-  maxOfflineUpdates: number = 5;
+  maxOfflineUpdates = 5;
   offlineUpdates: Record<string, number> = {};
 
   constructor(persistentStatePath?: string) {
@@ -123,13 +123,12 @@ const getTargetChannel = (
   client: Discord.Client,
   config: NotificationConfig,
 ): Maybe<Discord.TextChannel> => {
-  const guild = client.guilds
-    .resolve(config.guildId);
+  const guild = client.guilds.resolve(config.guildId);
 
   if (guild !== null) {
     return guild.channels.resolve(config.channelId) as Discord.TextChannel;
   }
-}
+};
 
 export interface NotificationConfig {
   guildId: string;

@@ -1,24 +1,19 @@
 import Discord from 'discord.js';
 import { Command } from '../Command';
 import {
-  KDRObject,
   matchSizeCommand,
   handleSizeCommand,
-  pickupSizeToString,
+  renderObjectText,
 } from '../../lib/reroll-objects';
-import { Language, stringDb } from '../../lib/reroll-strings';
 import { CHANNEL_IDS } from '..';
-
-const renderObject = (object: KDRObject, l: Language): string => {
-  const name = stringDb.getString(object.nameStrId as string, l) as string;
-  const size = pickupSizeToString(object.pickupSize as number);
-  return `${name}: ${size}`;
-};
 
 export const command: Command = {
   match(message: Discord.Message): boolean {
-    return message.channel.id === CHANNEL_IDS.KD_BOTSPAM &&
-      matchSizeCommand(message.content);
+    return (
+      (message.channel.id === CHANNEL_IDS.KD_BOTSPAM ||
+        message.channel.id === CHANNEL_IDS.TEST_GENERAL) &&
+      matchSizeCommand(message.content)
+    );
   },
 
   handle(message: Discord.Message) {
@@ -26,7 +21,7 @@ export const command: Command = {
     let response = '';
 
     for (let i = 0; i < objects.length; i++) {
-      response += renderObject(objects[i], primaryLanguage);
+      response += renderObjectText(objects[i], primaryLanguage);
       if (response.length > 360) {
         response += ` (${objects.length - i - 1} objects hidden)`;
         break;

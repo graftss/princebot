@@ -352,3 +352,10 @@ export const handleSizeCommand = (command: string): SizeCommandResult => {
     primaryLanguage: lang,
   };
 };
+
+export const renderObjectText = (object: KDRObject, l: Language): string => {
+  let name = stringDb.getString(object.nameStrId as string, l) as string;
+  if (object.nameTag !== '') name += ` [${object.nameTag}]`;
+  const size = pickupSizeToString(object.pickupSize as number);
+  return `${name}: ${size}`;
+};

@@ -1,17 +1,9 @@
 import { Command } from '../types';
 import {
-  KDRObject,
   matchSizeCommand,
   handleSizeCommand,
-  pickupSizeToString,
+  renderObjectText,
 } from '../../lib/reroll-objects';
-import { Language, stringDb } from '../../lib/reroll-strings';
-
-const renderObject = (object: KDRObject, l: Language): string => {
-  const name = stringDb.getString(object.nameStrId as string, l) as string;
-  const size = pickupSizeToString(object.pickupSize as number);
-  return `${name}: ${size}`;
-};
 
 export const handleSize: Command = (client, message) => {
   const { channel, text } = message;
@@ -22,7 +14,7 @@ export const handleSize: Command = (client, message) => {
   let response = '';
 
   for (let i = 0; i < objects.length; i++) {
-    response += renderObject(objects[i], primaryLanguage);
+    response += renderObjectText(objects[i], primaryLanguage);
     if (response.length > 360) {
       response += ` (${objects.length - i - 1} objects hidden)`;
       break;
