@@ -95,6 +95,7 @@ const katamariConfig: NotificationConfig = {
       'semanticallySatiated',
       'shamana',
       'sisuka7',
+      'suirencito',
       'sunkir',
       'the_mountain_fox',
       'theterrifictracy',
