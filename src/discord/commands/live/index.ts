@@ -75,6 +75,7 @@ const katamariConfig: NotificationConfig = {
       'harutomo',
       'hotdogturtle',
       'inightfall',
+      'itsdavesies',
       'italyflecktarn',
       'jokopoking',
       'journeymanb',
