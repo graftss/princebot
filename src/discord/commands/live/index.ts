@@ -94,6 +94,7 @@ const katamariConfig: NotificationConfig = {
       'randomizerhater92',
       'rattmann_',
       'semanticallySatiated',
+      'seruran_blue',
       'shamana',
       'sisuka7',
       'suirencito',
