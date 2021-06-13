@@ -774,6 +774,66 @@ export const handleCalcCommand = (query: string): string => {
   }
 };
 
+export const matchVsCommand = (query: string): boolean =>
+  query.startsWith('!vs');
+
+const sumVolumeReducer = (result: number, elt: ObjectListElement): number =>
+  elt.obj === undefined
+    ? result
+    : result + (elt.quantity * elt.obj!.pickupVolume!);
+
+export const handleVsCommand = (query: string): string => {
+  const SEPARATOR: string = 'vs';
+  const LANG = Language.ENGLISH;
+  const tokens = query.split(/\s+/);
+  const separatorIdx = tokens.map(s => s.toLowerCase()).indexOf(SEPARATOR);
+
+  // error handling for no separator
+  if (separatorIdx === -1) {
+    return `Couldn't parse !vs command. Correct format: \n\n` +
+      `!vs [objects] VS [objects]`;
+  }
+
+  // leave out the first token, which should be "!vs"
+  const leftTokens = tokens.slice(1, separatorIdx).join(' ');
+  const rightTokens = tokens.slice(separatorIdx + 1).join(' ');
+
+  // error handling for empty right token list
+  if (rightTokens.length === 0) {
+    return `Couldn't parse !vs command. Correct format: \n\n` +
+      `!vs [objects] VS [objects]`;
+  }
+
+  const leftList = parseObjectList(leftTokens, LANG);
+  const rightList = parseObjectList(rightTokens, LANG);
+
+  const leftStr = printObjectList(leftList);
+  const rightStr = printObjectList(rightList);
+
+  // error handling for unparsed objects
+  if (leftList.some(elt => elt.obj === undefined)) {
+    return `Couldn't parse left side: ${leftStr}`;
+  } else if (rightList.some(elt => elt.obj === undefined)) {
+    return `Couldn't parse right side: ${rightStr}`;
+  }
+
+  const leftVol = leftList.reduce(sumVolumeReducer, 0);
+  const rightVol = rightList.reduce(sumVolumeReducer, 0);
+
+  const leftBigger = leftVol > rightVol;
+  const volRatio = leftBigger ? (leftVol / rightVol) : (rightVol / leftVol);
+  const comparePct = Math.floor(volRatio * 1000) / 10;
+  const compareStr = leftBigger
+    ? `Left is **${comparePct}%** of right.`
+    : `Right is **${comparePct}%** of left.`;
+
+  return [
+    `Left volume: **${leftVol}** [${leftStr}]`,
+    `Right volume: **${rightVol}** [${rightStr}]`,
+    compareStr
+  ].join('\n\n');
+};
+
 /*example commands
   handleCalcCommand(
     '!calc moon: starfish island - anchor island'
