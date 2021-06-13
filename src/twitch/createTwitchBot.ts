@@ -31,6 +31,7 @@ export const createTwitchBot = (): Promise<[string, number]> => {
   const options = {
     identity: auth.twitchChat,
     channels: [
+      '#boulder1145',
       '#dunewacky',
       '#enzor_au',
       '#forginal',
