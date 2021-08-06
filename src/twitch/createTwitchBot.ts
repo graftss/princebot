@@ -35,6 +35,7 @@ export const createTwitchBot = (): Promise<[string, number]> => {
       '#dunewacky',
       '#enzor_au',
       '#forginal',
+      '#kumasbear',
       '#odyssic',
       '#pimittens',
       '#randomizerhater92',
