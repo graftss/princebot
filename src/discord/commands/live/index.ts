@@ -97,6 +97,7 @@ const katamariConfig: NotificationConfig = {
       'seruran_blue',
       'shamana',
       'sisuka7',
+      'speedsimpsons',
       'suirencito',
       'sunkir',
       'the_mountain_fox',
