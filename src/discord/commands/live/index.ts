@@ -74,6 +74,7 @@ const katamariConfig: NotificationConfig = {
       'garbitheglitcheress',
       'harleythered',
       'harutomo',
+      'holdenpnw',
       'hotdogturtle',
       'inightfall',
       'itsdavesies',
