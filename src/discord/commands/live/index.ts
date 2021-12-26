@@ -96,6 +96,7 @@ const katamariConfig: NotificationConfig = {
       'pvtcb',
       'randomizerhater92',
       'rattmann_',
+      'rtainjapan',
       'semanticallySatiated',
       'seruran_blue',
       'shamana',
