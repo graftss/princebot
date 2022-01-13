@@ -5,9 +5,10 @@ import { CHANNEL_IDS } from '../constants';
 
 export const command: Command = {
   match(message: Discord.Message): boolean {
-    return matchVsCommand(message.content) && (
-      message.channel.id === CHANNEL_IDS.KD_BOTSPAM ||
-      process.env.NODE_ENV === 'development'
+    return (
+      matchVsCommand(message.content) &&
+      (message.channel.id === CHANNEL_IDS.KD_BOTSPAM ||
+        process.env.NODE_ENV === 'development')
     );
   },
 

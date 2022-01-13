@@ -780,18 +780,20 @@ export const matchVsCommand = (query: string): boolean =>
 const sumVolumeReducer = (result: number, elt: ObjectListElement): number =>
   elt.obj === undefined
     ? result
-    : result + (elt.quantity * elt.obj!.pickupVolume!);
+    : result + elt.quantity * elt.obj!.pickupVolume!;
 
 export const handleVsCommand = (query: string): string => {
-  const SEPARATOR: string = 'vs';
+  const SEPARATOR = 'vs';
   const LANG = Language.ENGLISH;
   const tokens = query.split(/\s+/);
   const separatorIdx = tokens.map(s => s.toLowerCase()).indexOf(SEPARATOR);
 
   // error handling for no separator
   if (separatorIdx === -1) {
-    return `Couldn't parse !vs command. Correct format: \n\n` +
-      `!vs [objects] VS [objects]`;
+    return (
+      `Couldn't parse !vs command. Correct format: \n\n` +
+      `!vs [objects] VS [objects]`
+    );
   }
 
   // leave out the first token, which should be "!vs"
@@ -800,8 +802,10 @@ export const handleVsCommand = (query: string): string => {
 
   // error handling for empty right token list
   if (rightTokens.length === 0) {
-    return `Couldn't parse !vs command. Correct format: \n\n` +
-      `!vs [objects] VS [objects]`;
+    return (
+      `Couldn't parse !vs command. Correct format: \n\n` +
+      `!vs [objects] VS [objects]`
+    );
   }
 
   const leftList = parseObjectList(leftTokens, LANG);
@@ -821,7 +825,7 @@ export const handleVsCommand = (query: string): string => {
   const rightVol = rightList.reduce(sumVolumeReducer, 0);
 
   const leftBigger = leftVol > rightVol;
-  const volRatio = leftBigger ? (leftVol / rightVol) : (rightVol / leftVol);
+  const volRatio = leftBigger ? leftVol / rightVol : rightVol / leftVol;
   const comparePct = Math.floor(volRatio * 1000) / 10;
   const compareStr = leftBigger
     ? `Left is **${comparePct}%** of right.`
@@ -830,7 +834,7 @@ export const handleVsCommand = (query: string): string => {
   return [
     `Left volume: **${leftVol}** [${leftStr}]`,
     `Right volume: **${rightVol}** [${rightStr}]`,
-    compareStr
+    compareStr,
   ].join('\n\n');
 };
 

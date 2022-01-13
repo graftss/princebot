@@ -89,6 +89,7 @@ const katamariConfig: NotificationConfig = {
       'malkieriking',
       'martini',
       'midboss2',
+      'mr_shasta',
       'odyssic',
       'ohsuirencito',
       'paperspine',
