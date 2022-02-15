@@ -102,6 +102,7 @@ const katamariConfig: NotificationConfig = {
       'semanticallySatiated',
       'seruran_blue',
       'shamana',
+      'shookieTea',
       'sisuka7',
       'speedsimpsons',
       'sunkir',
