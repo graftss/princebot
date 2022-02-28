@@ -513,12 +513,12 @@ const missionSizeMultiplier = (mission: MISSION, diam: number): number => {
   return controls[controls.length - 1];
 };
 
-const objectMatch = (name: string, lang: Language): Maybe<KDRObject> => {
-  const matches = db
-    .objectNameMatches(name, lang, 10)
-    .filter(obj => obj.isCollectible);
-  return matches.length === 0 ? undefined : matches[0];
-};
+// const objectMatch = (name: string, lang: Language): Maybe<KDRObject> => {
+//   const matches = db
+//     .objectNameMatches(name, lang, 10)
+//     .filter(obj => obj.isCollectible);
+//   return matches.length === 0 ? undefined : matches[0];
+// };
 
 // an object list element can yield one object multiple times,
 // eg "carp streamer x3" to denote three carp streamers
@@ -778,9 +778,9 @@ export const matchVsCommand = (query: string): boolean =>
   query.startsWith('!vs');
 
 const sumVolumeReducer = (result: number, elt: ObjectListElement): number =>
-  elt.obj === undefined
+  elt.obj === undefined || elt.obj.pickupVolume === undefined
     ? result
-    : result + elt.quantity * elt.obj!.pickupVolume!;
+    : result + elt.quantity * elt.obj.pickupVolume;
 
 export const handleVsCommand = (query: string): string => {
   const SEPARATOR = 'vs';

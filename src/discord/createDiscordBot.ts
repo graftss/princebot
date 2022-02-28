@@ -3,7 +3,7 @@ import Discord from 'discord.js';
 import { auth } from '../auth';
 import { PersistentState } from '../lib/PersistentState';
 import { loadCommandsFromDir, Command } from './Command';
-import { addReactionRoles } from './addReactionRoles';
+// import { addReactionRoles } from './addReactionRoles';
 
 interface ClientConfig {
   statePath: string;

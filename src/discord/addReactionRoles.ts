@@ -43,10 +43,7 @@ export const addReactionRoles = (client: Discord.Client): void => {
       reaction => true || reaction.emoji.name === reactionRole.emojiName,
       { dispose: true } as any,
     );
-    reactionCollector.on(
-      'collect',
-      (reaction: Discord.MessageReaction, user) => {},
-    );
-    reactionCollector.on('remove', (reaction, user) => {});
+    reactionCollector.on('collect', () => {});
+    reactionCollector.on('remove', () => {});
   });
 };
