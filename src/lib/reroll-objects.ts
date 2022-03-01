@@ -245,6 +245,10 @@ class KDRObjectDb {
       return name + ';' + nameTag + ';' + size;
     });
   }
+  
+  randomCollectibleObject(): KDRObject {
+    return sample(this.objectList.filter(obj => obj.isCollectible)) as KDRObject;
+  }
 
   randomObjectQuery(l: Language, query: string): ObjectCommandResult {
     let relevantObjects = this.objectList;

@@ -34,11 +34,13 @@ export const createTwitchBot = (): Promise<[string, number]> => {
       '#boulder1145',
       '#dunewacky',
       '#enzor_au',
+      '#game1t',
       '#kumasbear',
       '#odyssic',
       '#pimittens',
       '#randomizerhater92',
       '#shamana',
+      '#shookietea',
     ],
   };
 
@@ -46,6 +48,8 @@ export const createTwitchBot = (): Promise<[string, number]> => {
 
   client.on('raw_message', ({ command, tags, params }) => {
     if (command !== 'PRIVMSG') return;
+
+    // Ignore messages sent from this bot.
     if (tags['display-name'] === options.identity.username) return;
 
     const message: T.Message = {
