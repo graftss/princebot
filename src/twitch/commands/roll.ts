@@ -1,7 +1,7 @@
 // import { Command } from '../types';
 // import { db, KDRObject } from "../../lib/reroll-objects";
 
-// interface IRange { 
+// interface IRange {
 //   min: number;
 //   max: number;
 // }
@@ -40,8 +40,8 @@
 
 //     let pickupChance = this.config.maxSuccessChance;
 
-//     // If the active object has a pickup size and it's 
-//     // 
+//     // If the active object has a pickup size and it's
+//     //
 //     if (this.activeObject.pickupSize !== undefined &&
 //         playerSize < this.activeObject.pickupSize
 //     ) {
@@ -59,7 +59,6 @@
 
 // // Roll a random object.
 // const getRandomObject = (): KDRObject => db.randomCollectibleObject();
-
 
 // export const handleRoll: Command = (client, message) => {
 //   const { channel, text } = message;

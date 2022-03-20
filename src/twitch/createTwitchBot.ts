@@ -10,8 +10,9 @@ import { handleObject } from './commands/object';
 import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
 import { handleAddCommand } from './commands/addcommand';
+import { handleWlkSize } from './commands/wlksize';
 
-const commands: T.Command[] = [handleSize];
+const commands: T.Command[] = [handleSize, handleWlkSize];
 
 const nonglobalCommands: { [key: string]: T.Command[] } = {
   '#randomizerhater92': [

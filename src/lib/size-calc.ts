@@ -673,7 +673,10 @@ const printTargetSize = (ts: TargetSize): string => {
 };
 
 // return value in cm
-const parseTargetSize = (str: string, lang: Language): Maybe<TargetSize> => {
+export const parseTargetSize = (
+  str: string,
+  lang: Language,
+): Maybe<TargetSize> => {
   // try to parse a display size (e.g. 1m2cm3mm).
   const display = parseDisplaySize(str);
   if (display !== undefined) return { cm: display };
@@ -782,6 +785,10 @@ const sumVolumeReducer = (result: number, elt: ObjectListElement): number =>
     ? result
     : result + elt.quantity * elt.obj.pickupVolume;
 
+const vsCommandErrorString: string =
+  `Couldn't parse !vs command. Correct format: !vs [comma-separated objects] VS [comma-separated objects]. \n\n` +
+  `Example: !vs shopping cart, lucky cat x2 VS turnip x3, flower basket [yellow], flower basket [blue].`;
+
 export const handleVsCommand = (query: string): string => {
   const SEPARATOR = 'vs';
   const LANG = Language.ENGLISH;
@@ -789,24 +796,14 @@ export const handleVsCommand = (query: string): string => {
   const separatorIdx = tokens.map(s => s.toLowerCase()).indexOf(SEPARATOR);
 
   // error handling for no separator
-  if (separatorIdx === -1) {
-    return (
-      `Couldn't parse !vs command. Correct format: \n\n` +
-      `!vs [objects] VS [objects]`
-    );
-  }
+  if (separatorIdx === -1) return vsCommandErrorString;
 
   // leave out the first token, which should be "!vs"
   const leftTokens = tokens.slice(1, separatorIdx).join(' ');
   const rightTokens = tokens.slice(separatorIdx + 1).join(' ');
 
   // error handling for empty right token list
-  if (rightTokens.length === 0) {
-    return (
-      `Couldn't parse !vs command. Correct format: \n\n` +
-      `!vs [objects] VS [objects]`
-    );
-  }
+  if (rightTokens.length === 0) return vsCommandErrorString;
 
   const leftList = parseObjectList(leftTokens, LANG);
   const rightList = parseObjectList(rightTokens, LANG);
@@ -837,6 +834,88 @@ export const handleVsCommand = (query: string): string => {
     compareStr,
   ].join('\n\n');
 };
+
+export const matchAnalogyCommand = (query: string): boolean =>
+  query.startsWith('!analogy ');
+
+// Parse one of the four size terms in the !analogy command.
+// If the term is '?', returns '?'.
+// Otherwise, the term should represent a size, and that size is returned (in cm).
+export const parseAnalogyTermSize = (
+  term: string,
+  lang: Language = Language.ENGLISH,
+): Maybe<number | '?'> => {
+  if (term === '?') return '?';
+
+  const targetSize: Maybe<TargetSize> = parseTargetSize(term, lang);
+  if (targetSize !== undefined) return targetSize.cm;
+
+  // TODO: parse !calc expressions like `girl - chicken`
+};
+
+// Computes the object volume necessary to increase katamari size from `start` to `end` in mission `mission`.
+const computeSizeDifference = (
+  mission: MISSION,
+  start: number,
+  end: number,
+): Maybe<number> => {
+  if (end < start) return undefined;
+
+  const MAX_ITER = 30;
+  const low = 0;
+  const high = 10000;
+  let guess: number;
+};
+
+const analogyCommandErrorStr: string =
+  `Couldn't parse !analogy command. Correct format:\n\n` +
+  `!analogy [level]: [size]:[size]::[size or ?]:[size or ?]\n\n` +
+  `Example: !analogy mas7: 165.4:88cm9mm :: girl:?`;
+
+const solveAnalogy = (
+  mission: MISSION,
+  l0: number,
+  r0: number,
+  l1: number,
+): Maybe<number> => {
+  if (l0 === r0) return l1;
+  if (l0 < r0) {
+  }
+
+  return -1;
+};
+
+export const handleAnalogyCommand = (query: string): string => {
+  const LANG: Language = Language.ENGLISH;
+  // syntax:
+  // !analogy [sizelist|?] : [sizelist|?] :: [sizelist|?] : [sizelist|?]
+  const queryRegex = /^!analogy\s+(\w+)\s*:\s*([^:]+)\s*:\s*([^:]+)\s*::\s*([^:]+)\s*:\s*([^:]+)\s*$/;
+
+  const match = query.match(queryRegex);
+  if (match === null) return analogyCommandErrorStr;
+
+  // trim whitespace off the ends of each capture group
+  // in a stupid, lazy way
+  const [_, missionStr, lhs0Str, rhs0Str, lhs1Str, rhs1Str] = match.map(s =>
+    s.trim(),
+  );
+  const termStrs = [lhs0Str, rhs0Str, lhs1Str, rhs1Str];
+
+  const mission: Maybe<MISSION> = parseMission(missionStr);
+  if (mission === undefined) {
+    return `Couldn't parse game level: ${missionStr}.`;
+  }
+
+  const termSizes = termStrs.map(termStr =>
+    parseAnalogyTermSize(termStr, LANG),
+  );
+  const numQuestionMarks = termSizes.filter(t => t === '?').length;
+  if (numQuestionMarks !== 1) return analogyCommandErrorStr;
+
+  return '';
+};
+
+handleAnalogyCommand('!analogy mas7: 88.8:165.7 ::      ? :turnip');
 
 /*example commands
   handleCalcCommand(

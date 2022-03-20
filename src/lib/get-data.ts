@@ -5,11 +5,13 @@ import parse from 'csv-parse/lib/sync';
 export enum DATA {
   REROLL_STRINGS,
   REROLL_OBJECTS,
+  WLK_SIZES,
 }
 
 const paths = {
   [DATA.REROLL_STRINGS]: join(__dirname, '../../data/reroll-strings.csv'),
   [DATA.REROLL_OBJECTS]: join(__dirname, '../../data/reroll-objects.csv'),
+  [DATA.WLK_SIZES]: join(__dirname, '../../data/wlk-sizes.csv'),
 };
 
 const cache: Partial<{ [d in DATA]: any }> = {};
