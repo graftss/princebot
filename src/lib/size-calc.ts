@@ -1,4 +1,4 @@
-import { db, KDRObject } from './reroll-objects';
+import { db, KDRObject, KDRObjectDb } from './reroll-objects';
 import { Language } from './reroll-strings';
 
 enum MISSION {
@@ -853,37 +853,77 @@ export const parseAnalogyTermSize = (
   // TODO: parse !calc expressions like `girl - chicken`
 };
 
-// Computes the object volume necessary to increase katamari size from `start` to `end` in mission `mission`.
-const computeSizeDifference = (
-  mission: MISSION,
-  start: number,
-  end: number,
-): Maybe<number> => {
-  if (end < start) return undefined;
-
-  const MAX_ITER = 30;
-  const low = 0;
-  const high = 10000;
-  let guess: number;
-};
-
 const analogyCommandErrorStr: string =
   `Couldn't parse !analogy command. Correct format:\n\n` +
   `!analogy [level]: [size]:[size]::[size or ?]:[size or ?]\n\n` +
   `Example: !analogy mas7: 165.4:88cm9mm :: girl:?`;
 
-const solveAnalogy = (
-  mission: MISSION,
-  l0: number,
-  r0: number,
-  l1: number,
-): Maybe<number> => {
-  if (l0 === r0) return l1;
-  if (l0 < r0) {
+class VolumeDifferenceSolver {
+  private MAGNITUDE = 10;
+  private objectsByMagnitude: (KDRObject & { pickupVolume: number })[];
+
+  constructor(db: KDRObjectDb) {
+    this.initObjectsByMagnitude(db);
   }
 
-  return -1;
-};
+  private initObjectsByMagnitude(db: KDRObjectDb): void {
+    const objs = db.objectsByAttachVolume();
+
+    this.objectsByMagnitude = [];
+    this.objectsByMagnitude.push(objs[0]);
+    let nextVolCutoff: number = objs[0].pickupVolume * this.MAGNITUDE;
+
+    for (let i = 1; i < objs.length; i++) {
+      const obj = objs[i];
+      if (obj.pickupVolume > nextVolCutoff) {
+        const lastObj = objs[i - 1];
+        this.objectsByMagnitude.push(lastObj);
+        nextVolCutoff = lastObj.pickupVolume * this.MAGNITUDE;
+      }
+    }
+
+    this.objectsByMagnitude.reverse();
+  }
+
+  // Computes a list of collected objects that will increase the katamari size
+  // from `initDiam` to `finalDiam` in the mission `mission`.
+  solveDiamDifference = (
+    mission: MISSION,
+    initDiam: number,
+    finalDiam: number,
+  ): ObjectListElement[] => {
+    if (finalDiam <= initDiam) return [];
+
+    const result: ObjectListElement[] = [];
+
+    for (let i = 0; i < this.objectsByMagnitude.length; i++) {
+      // Immediately rule out objects for which collecting one goes past the expected `finalDiam`.
+      const obj = this.objectsByMagnitude[i];
+      const sizeAfterOne = addObjectList(mission, initDiam, [
+        { obj, quantity: 1 },
+      ]);
+      if (sizeAfterOne > finalDiam) continue;
+
+      // If we can add at least one `obj` without going over `finalDiam`, find the largest
+      // quantity of added `obj` that doesn't go over `finalDiam`.
+      // (Which will be 1 less than the smallest quantity that does go over)
+      const nextObjListElt: ObjectListElement = { obj, quantity: 1 };
+      result.push(nextObjListElt);
+      for (let j = 1; j <= this.MAGNITUDE + 1; j++) {
+        nextObjListElt.quantity = j;
+        const sizeAfterJ = addObjectList(mission, initDiam, result);
+        if (sizeAfterJ > finalDiam) {
+          nextObjListElt.quantity -= 1;
+          break;
+        }
+      }
+    }
+
+    return result;
+  };
+}
+
+const volDiffSolver = new VolumeDifferenceSolver(db);
 
 export const handleAnalogyCommand = (query: string): string => {
   const LANG: Language = Language.ENGLISH;
@@ -912,10 +952,45 @@ export const handleAnalogyCommand = (query: string): string => {
   const numQuestionMarks = termSizes.filter(t => t === '?').length;
   if (numQuestionMarks !== 1) return analogyCommandErrorStr;
 
-  return '';
-};
+  // Parse the observed initial and final diameter as the lhs/rhs pair without the '?'.
+  let initDiam, finalDiam: number;
+  let initSolveDiam: number;
+  let isAddition: boolean;
+  if (termSizes[0] === '?' || termSizes[1] === '?') {
+    initDiam = termSizes[2] as number;
+    finalDiam = termSizes[3] as number;
+    initSolveDiam =
+      termSizes[0] === '?'
+        ? (termSizes[1] as number)
+        : (termSizes[0] as number);
+    isAddition = termSizes[1] === '?';
+  } else {
+    initDiam = termSizes[0] as number;
+    finalDiam = termSizes[1] as number;
+    initSolveDiam =
+      termSizes[2] === '?'
+        ? (termSizes[3] as number)
+        : (termSizes[2] as number);
+    isAddition = termSizes[3] === '?';
+  }
 
-handleAnalogyCommand('!analogy mas7: 88.8:165.7 ::      ? :turnip');
+  const differenceObjs = volDiffSolver.solveDiamDifference(
+    mission,
+    initDiam,
+    finalDiam,
+  );
+  const solvedDiam = isAddition
+    ? addObjectList(mission, initSolveDiam, differenceObjs)
+    : subtractObjectList(mission, initSolveDiam, differenceObjs);
+
+  const solveStr = isAddition
+    ? `${printCm(initSolveDiam)} : **${printCm(solvedDiam, 4)}**`
+    : `**${printCm(solvedDiam, 4)}** : ${printCm(initSolveDiam)}`;
+
+  return `(**${mission}**) ${printCm(initDiam)} : ${printCm(
+    finalDiam,
+  )} :: ${solveStr}`;
+};
 
 /*example commands
   handleCalcCommand(

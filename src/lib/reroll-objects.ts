@@ -150,7 +150,7 @@ export const filterToString = (filter: ObjectFilter, l: Language): string => {
   return stringDb.getString(filter.value, l) || '';
 };
 
-class KDRObjectDb {
+export class KDRObjectDb {
   private objectList: KDRObject[];
   private searchTermIds: string[];
 
@@ -161,6 +161,21 @@ class KDRObjectDb {
       ['categoryStrId', 'locationStrId', 'sizeStrId'],
       key => definedValues(this.objectList, key),
     );
+  }
+
+  objectsByAttachVolume(): (KDRObject & { pickupVolume: number })[] {
+    const objsWithAttachVolume = this.objectList.filter(
+      obj => obj.pickupVolume !== undefined && obj.pickupVolume > 0,
+    ) as (KDRObject & { pickupVolume: number })[];
+    return objsWithAttachVolume.sort((a, b) => a.pickupVolume - b.pickupVolume);
+  }
+
+  objectByNameIndex(monoNameIndex: number): Maybe<KDRObject> {
+    // Every object has a unique `monoNameIndex`, so `matches` should have at most one element.
+    const matches = this.objectList.filter(
+      obj => obj.monoNameIndex === monoNameIndex,
+    );
+    return matches.length > 0 ? matches[0] : undefined;
   }
 
   // returns the list of objects whose name contains the query as a substring
