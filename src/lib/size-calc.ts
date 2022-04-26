@@ -46,6 +46,8 @@ interface MissionSizeData {
   multiplierControls: number[];
 }
 
+const MAX_OBJECT_LIST_ELT_QUANTITY = 100;
+
 interface ObjectListElement {
   obj: Maybe<KDRObject>;
   quantity: number;
@@ -530,6 +532,7 @@ const parseObjectListElt = (elt: string, lang: Language): ObjectListElement => {
 
   if (match) {
     quantity = parseInt(match[2]) || 1;
+    quantity = Math.min(quantity, MAX_OBJECT_LIST_ELT_QUANTITY);
     objName = elt.replace(match[0], '');
   }
 
