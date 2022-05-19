@@ -61,6 +61,7 @@ const katamariConfig: NotificationConfig = {
   query: {
     usernames: [
       'blaust',
+      'bonkotu25',
       'boulder1145',
       'cherry_soup',
       'csaur',
