@@ -61,13 +61,12 @@ const katamariConfig: NotificationConfig = {
   query: {
     usernames: [
       'blaust',
-      'kaceytron',
       'bonkotu25',
-      'japanese_tea',
       'boulder1145',
       'cherry_soup',
       'csaur',
       'devteamster',
+      'dsun',
       'dunewacky',
       'enzor_au',
       'euclid999',
