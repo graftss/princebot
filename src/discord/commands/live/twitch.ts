@@ -24,16 +24,21 @@ export interface LiveStreamInfo extends StreamInfo, UserInfo {}
 export type LiveUpdate = LiveStreamInfo[];
 
 class TwitchOAuthToken {
-  private token = '';
+  private token?: string;
+  private requestPromise?: Promise<string>;
 
   constructor(private clientID: string, private clientSecret: string) {}
 
-  getToken(): string {
-    return this.token;
+  getToken(): Promise<string> {
+    return this.token === undefined
+      ? this.refreshToken()
+      : Promise.resolve(this.token);
   }
 
   refreshToken(): Promise<string> {
-    return request({
+    if (this.requestPromise !== undefined) return this.requestPromise;
+
+    this.requestPromise = request({
       method: 'POST',
       uri: 'https://id.twitch.tv/oauth2/token',
       qs: {
@@ -42,29 +47,41 @@ class TwitchOAuthToken {
         grant_type: 'client_credentials',
       },
       json: true,
-    }).then(res => (this.token = res.access_token));
+    }).then(res => {
+      this.token = res.access_token;
+      this.requestPromise = undefined;
+      return this.token;
+    });
+
+    return this.requestPromise;
   }
 }
 
 const oauth = new TwitchOAuthToken(auth.twitch.clientId, auth.twitch.secret);
 
-const getHeaders = (): object => ({
-  Authorization: `Bearer ${oauth.getToken()}`,
-  'Client-ID': auth.twitch.clientId,
-  Accept: 'application/vnd.twitchtv.v5+json',
-});
+const getHeaders = (): Promise<object> => 
+  oauth.getToken()
+    .then((token) => ({
+      Authorization: `Bearer ${token}`,
+      'Client-ID': auth.twitch.clientId,
+      Accept: 'application/vnd.twitchtv.v5+json',
+    }));
 
-const twitchRequest = (args: any): Promise<any> =>
-  request({
-    ...args,
-    json: true,
-    headers: getHeaders(),
-  }).catch(e => {
-    // oauth token failure
-    if (e.response.body.status === 401) {
-      return oauth.refreshToken().then(() => twitchRequest(args));
-    }
-  });
+const twitchRequest = (args: any): Promise<any> => {
+  return getHeaders()
+    .then((headers) => request({
+      ...args,
+      json: true,
+      headers,
+    }))
+    .catch(e => {
+      console.log('caught twitchRequest', args, e.message);
+      // oauth token failure
+      if (e.response.body.status === 401) {
+        return oauth.refreshToken().then(() => twitchRequest(args));
+      }
+    });
+};
 
 const extractUserInfo = (twitchUserObj: any): UserInfo => ({
   username: twitchUserObj.display_name,
@@ -114,7 +131,7 @@ const gameNameResolver = new GameNameResolver();
 
 const extractStreamInfo = (twitchStreamObj: any): StreamInfo => ({
   userId: twitchStreamObj.user_id,
-  username: twitchStreamObj.user_name,
+  username: twitchStreamObj.user_login,
   gameId: twitchStreamObj.game_id,
   game: null,
   title: twitchStreamObj.title,
