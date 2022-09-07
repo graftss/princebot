@@ -732,7 +732,7 @@ export const handleCalcCommand = (query: string): string => {
   if (match === null) {
     return (
       `Couldn't parse !calc command. Correct format:  \n\n` +
-      `!calc [level]: [starting object/size] [+ or -] [comma-separated objects with optional quantity (e.g. "rake, candy")]`
+      `!calc [level]: [starting object/size] [+ or -] [comma-separated objects with optional quantity (e.g. "rake x2, candy")]`
     );
   }
 
