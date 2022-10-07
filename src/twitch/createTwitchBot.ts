@@ -11,8 +11,9 @@ import { handleSong } from './commands/song';
 import { handleSize } from './commands/size';
 import { handleAddCommand } from './commands/addcommand';
 import { handleWlkSize } from './commands/wlksize';
+import { handleSquashSize } from './commands/squashsize';
 
-const commands: T.Command[] = [handleSize, handleWlkSize];
+const commands: T.Command[] = [handleSize, handleSquashSize, handleWlkSize];
 
 const nonglobalCommands: { [key: string]: T.Command[] } = {
   '#randomizerhater92': [

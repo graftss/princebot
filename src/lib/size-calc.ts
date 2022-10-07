@@ -1,6 +1,6 @@
 import { db, KDRObject, KDRObjectDb } from './reroll-objects';
 import { Language } from './reroll-strings';
-import { diamToVol, printCm, volToDiam } from './util';
+import { diamToVol, printCm, squashDiam, volToDiam } from './util';
 
 enum MISSION {
   MAS1 = 'MAS1',
@@ -634,15 +634,26 @@ export const parseCmLiteralSize = (str: string): Maybe<number> => {
 };
 
 interface TargetSize {
+  // the target size in cm.
   cm: number;
+
+  // true if the target size is based on an object.
   objName?: string;
+
+  // true if the target size is based on an object's squash size.
+  // if false, the target size is instead based on the object's usual pickup size.
+  squash?: boolean;
 }
 
 const printTargetSize = (ts: TargetSize): string => {
   const displaySize: string = printCm(ts.cm);
-  return ts.objName === undefined
-    ? displaySize
-    : `${ts.objName} (${displaySize})`;
+  if (ts.objName && ts.squash) {
+    return `SQUASH(${ts.objName}) (${displaySize})`;
+  } else if (ts.objName) {
+    return `${ts.objName} (${displaySize})`;
+  } else {
+    return displaySize;
+  }
 };
 
 // return value in cm
@@ -658,9 +669,19 @@ export const parseTargetSize = (
   const cmLiteral = parseCmLiteralSize(str);
   if (cmLiteral !== undefined) return { cm: cmLiteral };
 
+  let objName = str;
+
+  // try to parse a `squash([object name])` expression
+  let squash = false;
+  const squashMatch = str.match(/squash\((.*)\)/i);
+  if (squashMatch) {
+    objName = squashMatch[1];
+    squash = true;
+  }
+
   // finally, try to parse an object's name.
   const objMatches = db
-    .objectNameMatches(str, lang, 10)
+    .objectNameMatches(objName, lang, 10)
     .filter(obj => obj.isCollectible);
 
   if (objMatches.length > 0) {
@@ -670,10 +691,11 @@ export const parseTargetSize = (
         ? obj.englishName
         : obj.englishName + ` [${obj.nameTag}]`;
 
-    return {
-      cm: (obj.pickupSize as number) / 10,
-      objName,
-    };
+    const cm = squash
+      ? squashDiam(obj.volume)
+      : (obj.pickupSize as number) / 10;
+
+    return { cm, objName, squash };
   }
 };
 

@@ -6,7 +6,8 @@ import { CHANNEL_IDS } from '../constants';
 export const command: Command = {
   match(message: Discord.Message): boolean {
     return (
-      message.channel.id === CHANNEL_IDS.KD_BOTSPAM &&
+      (message.channel.id === CHANNEL_IDS.KD_BOTSPAM ||
+        message.channel.id === CHANNEL_IDS.TEST_GENERAL) &&
       matchCalcCommand(message.content)
     );
   },

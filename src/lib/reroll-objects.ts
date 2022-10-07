@@ -395,8 +395,13 @@ export const renderObjectText = (
   if (object.nameTag !== '') name += ` [${object.nameTag}]`;
 
   // render either the pickup size or the squash size
-  let size = printCm(squashDiam(object.volume), 3);
-  if (options.includeSquashDiam)
+  let size;
+  if (options.includeSquashDiam) {
+    size = printCm(squashDiam(object.volume), 3);
     size += ` (${pickupSizeToString(object.pickupSize as number)})`;
+  } else {
+    size = pickupSizeToString(object.pickupSize as number);
+  }
+
   return `${name}: ${size}`;
 };
