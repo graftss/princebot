@@ -716,6 +716,8 @@ const parseOperand = (str: string): Maybe<OPERAND> => {
 export const matchCalcCommand = (query: string): boolean =>
   query.startsWith('!calc');
 
+const formatCalcedSize = (size: string): string => `**[[${size}]]**`;
+
 export const handleCalcCommand = (query: string): string => {
   const lang: Language = Language.ENGLISH;
   const queryRegex = /^!calc\s+([\w ]+)\s*:\s*([^-+]+)\s*([-+])\s*(.*)$/;
@@ -756,7 +758,7 @@ export const handleCalcCommand = (query: string): string => {
 
       return (
         `(${mission}): ${printTargetSize(targetSize)} + ` +
-        `${printObjectList(objList)} = [[${resultStr}]]`
+        `${printObjectList(objList)} = ${formatCalcedSize(resultStr)}`
       );
     }
 
@@ -765,7 +767,7 @@ export const handleCalcCommand = (query: string): string => {
       const resultStr = printCm(resultSize, 4);
 
       return (
-        `(${mission}): [[${resultStr}]] + ` +
+        `(${mission}): ${formatCalcedSize(resultStr)} + ` +
         `${printObjectList(objList)} = ${printTargetSize(targetSize)}`
       );
     }

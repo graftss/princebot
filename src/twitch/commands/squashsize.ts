@@ -1,14 +1,14 @@
 import { Command } from '../types';
 import {
-  matchSizeCommand,
   handleSizeCommand,
   renderObjectText,
+  matchSquashSizeCommand,
 } from '../../lib/reroll-objects';
 
 export const handleSquashSize: Command = (client, message) => {
   const { channel, text } = message;
 
-  if (!matchSizeCommand(text)) return;
+  if (!matchSquashSizeCommand(text)) return;
 
   const { primaryLanguage, objects } = handleSizeCommand(text);
   let response = '';

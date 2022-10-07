@@ -398,7 +398,7 @@ export const renderObjectText = (
   let size;
   if (options.includeSquashDiam) {
     size = printCm(squashDiam(object.volume), 3);
-    size += ` (${pickupSizeToString(object.pickupSize as number)})`;
+    // size += ` (${pickupSizeToString(object.pickupSize as number)})`;
   } else {
     size = pickupSizeToString(object.pickupSize as number);
   }
