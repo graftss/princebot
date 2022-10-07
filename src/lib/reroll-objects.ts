@@ -2,6 +2,7 @@ import { chain, flatMap, sample, zip, sortBy, uniqBy } from 'lodash';
 import levenshtein from 'fast-levenshtein';
 import { parseLanguage, stringDb, Language } from './reroll-strings';
 import { DATA, getCsvData } from './get-data';
+import { printCm, squashDiam } from './util';
 
 export interface KDRObject {
   englishName: string;
@@ -374,9 +375,28 @@ export const handleSizeCommand = (command: string): SizeCommandResult => {
   };
 };
 
-export const renderObjectText = (object: KDRObject, l: Language): string => {
+export const matchSquashSizeCommand = (command: string): boolean =>
+  command.startsWith('!squashsize');
+
+export interface ObjTextConfig {
+  includeSquashDiam: boolean;
+}
+
+export const DEFAULT_OBJ_TEXT_CONFIG: ObjTextConfig = {
+  includeSquashDiam: false,
+};
+
+export const renderObjectText = (
+  object: KDRObject,
+  l: Language,
+  options: ObjTextConfig = DEFAULT_OBJ_TEXT_CONFIG,
+): string => {
   let name = stringDb.getString(object.nameStrId as string, l) as string;
   if (object.nameTag !== '') name += ` [${object.nameTag}]`;
-  const size = pickupSizeToString(object.pickupSize as number);
+
+  // render either the pickup size or the squash size
+  let size = printCm(squashDiam(object.volume), 3);
+  if (options.includeSquashDiam)
+    size += ` (${pickupSizeToString(object.pickupSize as number)})`;
   return `${name}: ${size}`;
 };

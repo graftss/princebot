@@ -48,7 +48,10 @@ class WlkObjectDb {
 
   // returns the list of objects whose name contains the query as a substring
   objectNamesWithSubstring(query: string): WlkObject[] {
-    query = query.toLowerCase().replace(/\s+/g, ' ').trim();
+    query = query
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
 
     return this.objectList.filter(obj => {
       if (!obj.name) return false;

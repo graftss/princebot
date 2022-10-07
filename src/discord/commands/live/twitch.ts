@@ -59,21 +59,22 @@ class TwitchOAuthToken {
 
 const oauth = new TwitchOAuthToken(auth.twitch.clientId, auth.twitch.secret);
 
-const getHeaders = (): Promise<object> => 
-  oauth.getToken()
-    .then((token) => ({
-      Authorization: `Bearer ${token}`,
-      'Client-ID': auth.twitch.clientId,
-      Accept: 'application/vnd.twitchtv.v5+json',
-    }));
+const getHeaders = (): Promise<object> =>
+  oauth.getToken().then(token => ({
+    Authorization: `Bearer ${token}`,
+    'Client-ID': auth.twitch.clientId,
+    Accept: 'application/vnd.twitchtv.v5+json',
+  }));
 
 const twitchRequest = (args: any): Promise<any> => {
   return getHeaders()
-    .then((headers) => request({
-      ...args,
-      json: true,
-      headers,
-    }))
+    .then(headers =>
+      request({
+        ...args,
+        json: true,
+        headers,
+      }),
+    )
     .catch(e => {
       console.log('caught twitchRequest', args, e.message);
       // oauth token failure

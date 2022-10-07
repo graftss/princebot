@@ -1,5 +1,6 @@
 import { db, KDRObject, KDRObjectDb } from './reroll-objects';
 import { Language } from './reroll-strings';
+import { diamToVol, printCm, volToDiam } from './util';
 
 enum MISSION {
   MAS1 = 'MAS1',
@@ -475,17 +476,6 @@ const MISSION_SIZE_DATA: Record<MISSION, MissionSizeData> = {
   },
 };
 
-const _4piOver3: number = (Math.PI * 4) / 3;
-const _3Over4pi: number = 1 / _4piOver3;
-const FUDGE = 0.02;
-
-// volumes are in m^3, diameters are in cm
-const volToDiam = (vol: number): number =>
-  Math.pow(vol * _3Over4pi, 0.3333333) * 200 + FUDGE;
-
-const diamToVol = (diam: number): number =>
-  Math.pow((diam - FUDGE) / 200, 3) * _4piOver3;
-
 const lerp = (
   x1: number,
   y1: number,
@@ -647,26 +637,6 @@ interface TargetSize {
   cm: number;
   objName?: string;
 }
-
-const printCm = (cm: number, mmPrecision = 0): string => {
-  let result = '';
-  let s = cm * 10;
-
-  if (s % 10 !== 0) {
-    const mmStr =
-      mmPrecision === 0
-        ? Math.floor(s % 10)
-        : (s % 10).toPrecision(mmPrecision);
-    result = `${mmStr}mm`;
-  }
-  s = Math.floor(s / 10);
-
-  if (s % 100 !== 0 || result !== '') result = `${s % 100}cm` + result;
-  s = Math.floor(s / 100);
-
-  if (s > 0) result = `${s}m` + result;
-  return result;
-};
 
 const printTargetSize = (ts: TargetSize): string => {
   const displaySize: string = printCm(ts.cm);
