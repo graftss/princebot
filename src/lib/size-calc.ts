@@ -595,12 +595,13 @@ const subtractObjectList = (
 };
 
 const printObjectListElement = (elt: ObjectListElement): string => {
-  if (elt.obj === undefined) return '??? (x0)';
+  if (elt.obj === undefined) return '???';
 
-  const { nameTag, englishName } = elt.obj;
+  const { obj: { nameTag, englishName }, quantity } = elt;
 
-  const nameTagStr = nameTag ? ` [${nameTag}] ` : '';
-  return `${englishName}${nameTagStr}(x${elt.quantity})`;
+  const nameTagStr = nameTag ? ` [${nameTag}]` : '';
+  const quantityStr = quantity === 1 ? '' : ` x${quantity}`;
+  return `${englishName}${nameTagStr}${quantityStr}`;
 };
 
 const printObjectList = (objList: ObjectListElement[]): string => {
@@ -609,7 +610,7 @@ const printObjectList = (objList: ObjectListElement[]): string => {
 
 const parseMission = (str: string): Maybe<MISSION> => {
   for (const key in MISSION_SIZE_DATA) {
-    if (MISSION_SIZE_DATA[key as MISSION].names.includes(str)) {
+    if (MISSION_SIZE_DATA[key as MISSION].names.includes(str) || str === key) {
       return key as MISSION;
     }
   }
@@ -716,7 +717,7 @@ const parseOperand = (str: string): Maybe<OPERAND> => {
 export const matchCalcCommand = (query: string): boolean =>
   query.startsWith('!calc');
 
-const formatCalcedSize = (size: string): string => `**[[${size}]]**`;
+const formatResultSize = (size: string): string => `**${size}**`;
 
 export const handleCalcCommand = (query: string): string => {
   const lang: Language = Language.ENGLISH;
@@ -726,7 +727,7 @@ export const handleCalcCommand = (query: string): string => {
   if (match === null) {
     return (
       `Couldn't parse !calc command. Correct format:  \n\n` +
-      `!calc [level]: [starting object/size] [+ or -] [comma-separated objects with optional quantity (e.g. "rake x2, candy")]`
+      `!calc [level]: [starting object/size] [+ or -] [comma-separated objects (e.g. "rake x2, candy")]`
     );
   }
 
@@ -757,8 +758,8 @@ export const handleCalcCommand = (query: string): string => {
       const resultStr = printCm(resultSize, 4);
 
       return (
-        `(${mission}): ${printTargetSize(targetSize)} + ` +
-        `${printObjectList(objList)} = ${formatCalcedSize(resultStr)}`
+        `**${mission}**: ${printTargetSize(targetSize)} + ` +
+        `${printObjectList(objList)} = ${formatResultSize(resultStr)}`
       );
     }
 
@@ -767,7 +768,7 @@ export const handleCalcCommand = (query: string): string => {
       const resultStr = printCm(resultSize, 4);
 
       return (
-        `(${mission}): ${formatCalcedSize(resultStr)} + ` +
+        `(${mission}): ${formatResultSize(resultStr)} + ` +
         `${printObjectList(objList)} = ${printTargetSize(targetSize)}`
       );
     }
