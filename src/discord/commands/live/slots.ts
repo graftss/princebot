@@ -1,5 +1,3 @@
-const sample = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-
 /*
 const retired = [
   '<:cartLady:606338985706651688>',
@@ -34,6 +32,8 @@ export const chestEmotes = [
   '<:marina:765071013947506688>',
   '<:tsubohachi:765070770014519307>',
 ];
+
+const sample = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 export const slots = (emotes: string[], rolls: number): string => {
   const items: string[] = [];
