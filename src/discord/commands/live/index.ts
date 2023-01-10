@@ -113,6 +113,7 @@ const katamariConfig: NotificationConfig = {
       'sisuka7',
       'speedsimpsons',
       'sunkir',
+      'syugosyugi',
       'the_mountain_fox',
       'theterrifictracy',
       'xainjaya',
