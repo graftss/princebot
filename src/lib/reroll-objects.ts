@@ -3,8 +3,9 @@ import levenshtein from 'fast-levenshtein';
 import { parseLanguage, stringDb, Language } from './reroll-strings';
 import { DATA, getCsvData } from './get-data';
 import { printCm, squashDiam } from './util';
+import { GameObject, GameObjectDb } from './object-db';
 
-export interface KDRObject {
+export interface KDRObject extends GameObject {
   englishName: string;
   monoNameIndex: number;
   pickupSize?: number; // integer (mm)
@@ -151,7 +152,7 @@ export const filterToString = (filter: ObjectFilter, l: Language): string => {
   return stringDb.getString(filter.value, l) || '';
 };
 
-export class KDRObjectDb {
+export class KDRObjectDb implements GameObjectDb<KDRObject> {
   private objectList: KDRObject[];
   private searchTermIds: string[];
 

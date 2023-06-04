@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import { Command } from '../Command';
-import { matchVsCommand, handleVsCommand } from '../../lib/size-calc';
+import { matchVsCommand, handleVsCommand, GAME } from '../../lib/size-calc';
 import { CHANNEL_IDS } from '../constants';
 
 export const command: Command = {
@@ -13,7 +13,7 @@ export const command: Command = {
   },
 
   handle(message: Discord.Message) {
-    const response = handleVsCommand(message.content);
+    const response = handleVsCommand(message.content, GAME.KD);
 
     return message.channel.send(response);
   },

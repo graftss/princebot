@@ -1,21 +1,43 @@
+import { GameObject, GameObjectDb } from '../object-db';
 import { db, KDRObject, KDRObjectDb } from '../reroll-objects';
 import { Language } from '../reroll-strings';
 import { diamToVol, printCm, squashDiam, volToDiam } from '../util';
+import { wlkdb } from '../wlk-objects';
+import { KD_VOLRATES } from './kd';
+import { WLK_VOLRATES } from './wlk';
 
 const MAX_OBJECT_LIST_ELT_QUANTITY = 100;
 
+export enum GAME {
+  KD = 'KD',
+  WLK = 'WLK,',
+}
+
+const GAME_DATA: Record<GAME, VolRatesRecord> = {
+  [GAME.KD]: KD_VOLRATES,
+  [GAME.WLK]: WLK_VOLRATES,
+};
+
+const GAME_DBS: Record<GAME, GameObjectDb> = {
+  [GAME.KD]: db,
+  [GAME.WLK]: wlkdb,
+};
+
 // `M` should be an enum type for all possible missions
-export interface MissionSizeData<M> {
+export interface MissionSizeData<M = string> {
   key: M;
   names: string[];
   initDiam?: number;
   multiplierControls: number[];
 }
 
-export type VolRatesRecord<M extends string> = Record<M, MissionSizeData<M>>;
+export type VolRatesRecord<M extends string = string> = Record<
+  M,
+  MissionSizeData<M>
+>;
 
 interface ObjectListElement {
-  obj: Maybe<KDRObject>;
+  obj: Maybe<GameObject>;
   quantity: number;
 }
 
@@ -33,8 +55,11 @@ const lerp = (
 ): number => y1 + ((y2 - y1) / (x2 - x1)) * (x - x1);
 
 // computes the size multiplier in `mission` at the diameter `diam`
-const missionSizeMultiplier = (mission: MISSION, diam: number): number => {
-  const controls: number[] = MISSION_SIZE_DATA[mission].multiplierControls;
+const missionSizeMultiplier = (
+  mission: MissionSizeData,
+  diam: number,
+): number => {
+  const controls: number[] = mission.multiplierControls;
   for (let i = 0; i < controls.length; i += 2) {
     // find the first control diameter that exceeds the input diameter
     if (controls[i] > diam) {
@@ -62,16 +87,29 @@ const missionSizeMultiplier = (mission: MISSION, diam: number): number => {
 
 // an object list element can yield one object multiple times,
 // eg "carp streamer x3" to denote three carp streamers
-const parseObjectListElt = (elt: string, lang: Language): ObjectListElement => {
-  // look for "x{number}" at the end of the object list element
-  const match = elt.match(/\s+x(\s+)?(\d+)$/);
-  let quantity = 1;
+const parseObjectListElt = (
+  elt: string,
+  lang: Language,
+  db: GameObjectDb,
+): ObjectListElement => {
   let objName: string = elt;
 
-  if (match) {
-    quantity = parseInt(match[2]) || 1;
+  // try to parse a [size hint] in square brackets
+  const sizeHintMatch = objName.match(/\[\s*(.*)\s*\]/);
+  let sizeHint: Maybe<TargetSize> = undefined;
+  if (sizeHintMatch !== null) {
+    sizeHint = parseTargetSize(sizeHintMatch[1], lang);
+    objName = objName.replace(sizeHintMatch[0], '');
+  }
+
+  // look for "x{number}" at the end of the object list element
+  const quantityMatch = objName.match(/\s+x(\s+)?(\d+)$/);
+  let quantity = 1;
+
+  if (quantityMatch) {
+    quantity = parseInt(quantityMatch[2]) || 1;
     quantity = Math.min(quantity, MAX_OBJECT_LIST_ELT_QUANTITY);
-    objName = elt.replace(match[0], '');
+    objName = objName.replace(quantityMatch[0], '');
   }
 
   const objMatches = db
@@ -80,19 +118,39 @@ const parseObjectListElt = (elt: string, lang: Language): ObjectListElement => {
 
   if (objMatches.length === 0) return NO_MATCH;
 
+  let objMatch = objMatches[0];
+  if (sizeHint !== undefined) {
+    // object pickup sizes are stored in mm
+    const targetSize = sizeHint.cm * 10;
+
+    // search for the object with the pickup size nearest to the size hint, if one was given
+    objMatch = objMatches.reduce((result, next) => {
+      if (next.pickupSize === undefined) return result;
+      // return the object out of `next` and `result` whose pickup size is closer to `targetSize`
+      return Math.abs(next.pickupSize - targetSize) <
+        Math.abs(result.pickupSize! - targetSize)
+        ? next
+        : result;
+    });
+  }
+
   return {
-    obj: objMatches[0],
+    obj: objMatch,
     quantity,
   };
 };
 
-const parseObjectList = (str: string, lang: Language): ObjectListElement[] => {
+const parseObjectList = (
+  str: string,
+  lang: Language,
+  db: GameObjectDb,
+): ObjectListElement[] => {
   const elts = str.split(/\s*,\s*/);
-  return elts.map(elt => parseObjectListElt(elt, lang));
+  return elts.map(elt => parseObjectListElt(elt, lang, db));
 };
 
 const addObjectList = (
-  mission: MISSION,
+  mission: MissionSizeData,
   initDiam: number,
   objList: ObjectListElement[],
 ): number => {
@@ -113,7 +171,7 @@ const addObjectList = (
 };
 
 const subtractObjectList = (
-  mission: MISSION,
+  mission: MissionSizeData,
   finalDiam: number,
   objList: ObjectListElement[],
 ): number => {
@@ -122,7 +180,7 @@ const subtractObjectList = (
 
   // just binary search to find the desired initial diameter.
   // solving for it analytically would be pointless.
-  let low: number = MISSION_SIZE_DATA[mission].initDiam;
+  let low: number = mission.initDiam || 0;
   let high: number = finalDiam;
   let guess: number = finalDiam;
 
@@ -145,7 +203,10 @@ const subtractObjectList = (
 const printObjectListElement = (elt: ObjectListElement): string => {
   if (elt.obj === undefined) return '???';
 
-  const { obj: { nameTag, englishName }, quantity } = elt;
+  const {
+    obj: { nameTag, englishName },
+    quantity,
+  } = elt;
 
   const nameTagStr = nameTag ? ` [${nameTag}]` : '';
   const quantityStr = quantity === 1 ? '' : ` x${quantity}`;
@@ -156,10 +217,13 @@ const printObjectList = (objList: ObjectListElement[]): string => {
   return objList.map(printObjectListElement).join(', ');
 };
 
-const parseMission = (str: string): Maybe<MISSION> => {
-  for (const key in MISSION_SIZE_DATA) {
-    if (MISSION_SIZE_DATA[key as MISSION].names.includes(str) || str === key) {
-      return key as MISSION;
+const parseMission = <M extends string>(
+  data: VolRatesRecord<M>,
+  str: string,
+): Maybe<M> => {
+  for (const key in data) {
+    if (data[key as M].names.includes(str) || str === key) {
+      return key as M;
     }
   }
 };
@@ -267,9 +331,11 @@ export const matchCalcCommand = (query: string): boolean =>
 
 const formatResultSize = (size: string): string => `**${size}**`;
 
-export const handleCalcCommand = (query: string): string => {
+export const handleCalcCommand = (query: string, game: GAME): string => {
+  const gameData = GAME_DATA[game];
+  const gameObjDb = GAME_DBS[game];
   const lang: Language = Language.ENGLISH;
-  const queryRegex = /^!calc\s+([\w ]+)\s*:\s*([^-+]+)\s*([-+])\s*(.*)$/;
+  const queryRegex = /^\s*([\w ]+)\s*:\s*([^-+]+)\s*([-+])\s*(.*)$/;
 
   const match = query.match(queryRegex);
   if (match === null) {
@@ -285,7 +351,7 @@ export const handleCalcCommand = (query: string): string => {
     s.trim(),
   );
 
-  const mission: Maybe<MISSION> = parseMission(missionStr);
+  const mission = parseMission(gameData, missionStr);
   if (mission === undefined) {
     return `Couldn't parse game level: ${missionStr}.`;
   }
@@ -298,11 +364,16 @@ export const handleCalcCommand = (query: string): string => {
   const operand: Maybe<OPERAND> = parseOperand(operandStr);
   if (operand === undefined) return `Couldn't parse operand: ${operandStr}`;
 
-  const objList: ObjectListElement[] = parseObjectList(objListStr, lang);
+  const objList: ObjectListElement[] = parseObjectList(
+    objListStr,
+    lang,
+    gameObjDb,
+  );
+  const missionData: MissionSizeData = gameData[mission];
 
   switch (operand) {
     case OPERAND.PLUS: {
-      const resultSize = addObjectList(mission, targetSize.cm, objList);
+      const resultSize = addObjectList(missionData, targetSize.cm, objList);
       const resultStr = printCm(resultSize, 4);
 
       return (
@@ -312,7 +383,11 @@ export const handleCalcCommand = (query: string): string => {
     }
 
     case OPERAND.MINUS: {
-      const resultSize = subtractObjectList(mission, targetSize.cm, objList);
+      const resultSize = subtractObjectList(
+        missionData,
+        targetSize.cm,
+        objList,
+      );
       const resultStr = printCm(resultSize, 4);
 
       return (
@@ -335,7 +410,8 @@ const vsCommandErrorString: string =
   `Couldn't parse !vs command. Correct format: !vs [comma-separated objects] VS [comma-separated objects]. \n\n` +
   `Example: !vs shopping cart, lucky cat x2 VS turnip x3, flower basket [yellow], flower basket [blue].`;
 
-export const handleVsCommand = (query: string): string => {
+export const handleVsCommand = (query: string, game: GAME): string => {
+  const GAME_OBJ_DB = GAME_DBS[game];
   const SEPARATOR = 'vs';
   const LANG = Language.ENGLISH;
   const tokens = query.split(/\s+/);
@@ -351,8 +427,8 @@ export const handleVsCommand = (query: string): string => {
   // error handling for empty right token list
   if (rightTokens.length === 0) return vsCommandErrorString;
 
-  const leftList = parseObjectList(leftTokens, LANG);
-  const rightList = parseObjectList(rightTokens, LANG);
+  const leftList = parseObjectList(leftTokens, LANG, GAME_OBJ_DB);
+  const rightList = parseObjectList(rightTokens, LANG, GAME_OBJ_DB);
 
   const leftStr = printObjectList(leftList);
   const rightStr = printObjectList(rightList);
@@ -408,6 +484,7 @@ class VolumeDifferenceSolver {
   private MAGNITUDE = 10;
   private objectsByMagnitude: (KDRObject & { pickupVolume: number })[];
 
+  // TODO: make this a `GameObjectDb`
   constructor(db: KDRObjectDb) {
     this.initObjectsByMagnitude(db);
   }
@@ -434,7 +511,7 @@ class VolumeDifferenceSolver {
   // Computes a list of collected objects that will increase the katamari size
   // from `initDiam` to `finalDiam` in the mission `mission`.
   solveDiamDifference = (
-    mission: MISSION,
+    missionData: MissionSizeData,
     initDiam: number,
     finalDiam: number,
   ): ObjectListElement[] => {
@@ -445,7 +522,7 @@ class VolumeDifferenceSolver {
     for (let i = 0; i < this.objectsByMagnitude.length; i++) {
       // Immediately rule out objects for which collecting one goes past the expected `finalDiam`.
       const obj = this.objectsByMagnitude[i];
-      const sizeAfterOne = addObjectList(mission, initDiam, [
+      const sizeAfterOne = addObjectList(missionData, initDiam, [
         { obj, quantity: 1 },
       ]);
       if (sizeAfterOne > finalDiam) continue;
@@ -457,7 +534,7 @@ class VolumeDifferenceSolver {
       result.push(nextObjListElt);
       for (let j = 1; j <= this.MAGNITUDE + 1; j++) {
         nextObjListElt.quantity = j;
-        const sizeAfterJ = addObjectList(mission, initDiam, result);
+        const sizeAfterJ = addObjectList(missionData, initDiam, result);
         if (sizeAfterJ > finalDiam) {
           nextObjListElt.quantity -= 1;
           break;
@@ -471,8 +548,12 @@ class VolumeDifferenceSolver {
 
 const volDiffSolver = new VolumeDifferenceSolver(db);
 
-export const handleAnalogyCommand = (query: string): string => {
+export const handleAnalogyCommand = (
+  query: string,
+  game: GAME = GAME.KD,
+): string => {
   const LANG: Language = Language.ENGLISH;
+  const gameData = GAME_DATA[game];
   // syntax:
   // !analogy [sizelist|?] : [sizelist|?] :: [sizelist|?] : [sizelist|?]
   const queryRegex = /^!analogy\s+(\w+)\s*:\s*([^:]+)\s*:\s*([^:]+)\s*::\s*([^:]+)\s*:\s*([^:]+)\s*$/;
@@ -487,10 +568,12 @@ export const handleAnalogyCommand = (query: string): string => {
   );
   const termStrs = [lhs0Str, rhs0Str, lhs1Str, rhs1Str];
 
-  const mission: Maybe<MISSION> = parseMission(missionStr);
+  const mission = parseMission(gameData, missionStr);
   if (mission === undefined) {
     return `Couldn't parse game level: ${missionStr}.`;
   }
+
+  const missionData = gameData[mission];
 
   const termSizes = termStrs.map(termStr =>
     parseAnalogyTermSize(termStr, LANG),
@@ -521,13 +604,13 @@ export const handleAnalogyCommand = (query: string): string => {
   }
 
   const differenceObjs = volDiffSolver.solveDiamDifference(
-    mission,
+    missionData,
     initDiam,
     finalDiam,
   );
   const solvedDiam = isAddition
-    ? addObjectList(mission, initSolveDiam, differenceObjs)
-    : subtractObjectList(mission, initSolveDiam, differenceObjs);
+    ? addObjectList(missionData, initSolveDiam, differenceObjs)
+    : subtractObjectList(missionData, initSolveDiam, differenceObjs);
 
   const solveStr = isAddition
     ? `${printCm(initSolveDiam)} : **${printCm(solvedDiam, 4)}**`
@@ -549,3 +632,5 @@ export const handleAnalogyCommand = (query: string): string => {
 
 
 */
+
+console.log(handleCalcCommand('alap1: 5.02 + blue pushpin', GAME.WLK));
