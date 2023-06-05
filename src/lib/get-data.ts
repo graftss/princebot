@@ -7,6 +7,7 @@ export enum DATA {
   REROLL_OBJECTS,
   WLK_SIZES,
   WLKR_OBJECTS,
+  WLKR_OBJ_VOLS,
 }
 
 const paths = {
@@ -14,6 +15,7 @@ const paths = {
   [DATA.REROLL_OBJECTS]: join(__dirname, '../../data/reroll-objects.csv'),
   [DATA.WLK_SIZES]: join(__dirname, '../../data/wlk-sizes.csv'),
   [DATA.WLKR_OBJECTS]: join(__dirname, '../../data/wlkr-objects.csv'),
+  [DATA.WLKR_OBJ_VOLS]: join(__dirname, '../../data/wlkr-obj-vols.csv'),
 };
 
 const cache: Partial<{ [d in DATA]: any }> = {};

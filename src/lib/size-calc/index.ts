@@ -633,4 +633,9 @@ export const handleAnalogyCommand = (
 
 */
 
-console.log(handleCalcCommand('alap1: 5.02 + blue pushpin', GAME.WLK));
+console.log(
+  handleCalcCommand(
+    'sweet_1: 50.02 + strawberry flower, grape flower, strawberry flower, grape flower, mandarin flower, big chocolate pie x6',
+    GAME.WLK,
+  ),
+);

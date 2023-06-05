@@ -18,10 +18,48 @@ export class WLKObjectDb implements GameObjectDb<WLKObject> {
   private objectList: WLKObject[];
 
   constructor() {
-    this.objectList = getCsvData(DATA.WLKR_OBJECTS);
+    this.objectList = [];
+    getCsvData(DATA.WLKR_OBJECTS).forEach(
+      obj => (this.objectList[obj.monoNameIndex] = obj),
+    );
+
+    // fill holes in incomplete wlkr objects to match what kdr bot commands expect
     this.objectList.forEach(o => {
       o.isCollectible = true;
+      if (o.pickupVolumePenalty !== undefined && o.volume !== undefined) {
+        o.pickupVolume = o.pickupVolumePenalty * o.volume;
+      }
     });
+
+    this.auditObjVols();
+
+    getCsvData(DATA.WLKR_OBJ_VOLS).forEach(p => {
+      if (this.objectList[p.monoNameIndex] !== undefined) {
+        this.objectList[p.monoNameIndex].pickupVolume = p.pickupVolume;
+      }
+    });
+  }
+
+  auditObjVols() {
+    const volsByName: Record<number, string[]> = getCsvData(
+      DATA.WLKR_OBJ_VOLS,
+    ).reduce((table: Record<number, string[]>, next) => {
+      const { monoNameIndex, pickupVolume } = next;
+      if (parseFloat(pickupVolume) == 0) return table;
+
+      if (table[monoNameIndex] === undefined) {
+        table[monoNameIndex] = [pickupVolume];
+      } else if (!table[monoNameIndex].includes(pickupVolume)) {
+        table[monoNameIndex].push(pickupVolume);
+      }
+      return table;
+    }, {});
+
+    for (const nameIdx in volsByName) {
+      if (volsByName[nameIdx].length > 1) {
+        console.log(`big set: ${nameIdx} // ${volsByName[nameIdx].join(',')}`);
+      }
+    }
   }
 
   // returns the list of objects whose name contains the query as a substring
