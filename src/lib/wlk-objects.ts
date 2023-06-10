@@ -14,7 +14,7 @@ interface WLKObjVol {
   scaleZ: number;
 }
 
-const getBaseVolume = (ov: WLKObjVol): number => 
+const getBaseVolume = (ov: WLKObjVol): number =>
   ov.pickupVolume / (ov.scaleX * ov.scaleY * ov.scaleZ);
 
 // ** assumes query is pre-normalized to be lower case **
@@ -58,28 +58,39 @@ export class WLKObjectDb implements GameObjectDb<WLKObject> {
       scaleX: parseFloat(ov.scaleX),
       scaleY: parseFloat(ov.scaleY),
       scaleZ: parseFloat(ov.scaleZ),
-    }))
+    }));
   }
 
   auditObjVols() {
-    const volsByName: Record<number, WLKObjVol[]> = this.readObjVols().reduce((table: Record<number, WLKObjVol[]>, next) => {
-      const { monoNameIndex, pickupVolume } = next;
-      if (pickupVolume == 0) return table;
+    const volsByName: Record<number, WLKObjVol[]> = this.readObjVols().reduce(
+      (table: Record<number, WLKObjVol[]>, next) => {
+        const { monoNameIndex, pickupVolume } = next;
+        if (pickupVolume == 0) return table;
 
-      const baseVol = getBaseVolume(next);
+        const baseVol = getBaseVolume(next);
 
-      if (table[monoNameIndex] === undefined) {
-        table[monoNameIndex] = [next];
-      } else if (!table[monoNameIndex].find(x => Math.abs(1 - getBaseVolume(x) / baseVol) < 0.01)) {
-        table[monoNameIndex].push(next)
-      }
-      return table;
-    }, {});
+        if (table[monoNameIndex] === undefined) {
+          table[monoNameIndex] = [next];
+        } else if (
+          !table[monoNameIndex].find(
+            x => Math.abs(1 - getBaseVolume(x) / baseVol) < 0.01,
+          )
+        ) {
+          table[monoNameIndex].push(next);
+        }
+        return table;
+      },
+      {},
+    );
 
     for (const nameIdx in volsByName) {
       if (volsByName[nameIdx].length > 1) {
         const engName = this.objectList[nameIdx].englishName;
-        console.log(`big set: ${nameIdx} (${engName}) // ${volsByName[nameIdx].map(x => JSON.stringify(x)).join(',')}`);
+        console.log(
+          `big set: ${nameIdx} (${engName}) // ${volsByName[nameIdx]
+            .map(x => JSON.stringify(x))
+            .join(',')}`,
+        );
       }
     }
   }

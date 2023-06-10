@@ -117,6 +117,7 @@ const katamariConfig: NotificationConfig = {
       'syugosyugi',
       'the_mountain_fox',
       'theterrifictracy',
+      'twilightpb',
       'xainjaya',
       'xephyrsg',
     ],

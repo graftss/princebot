@@ -1,5 +1,5 @@
-import { VolRatesRecord } from '.';
 import { DATA, getCsvData } from '../get-data';
+import { VolRatesRecord } from '.';
 
 export enum WLK_MISSIONS {
   big1_1 = 'big1_1',
