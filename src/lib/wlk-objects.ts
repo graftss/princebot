@@ -6,6 +6,17 @@ import { DATA, getCsvData } from './get-data';
 
 export type WLKObject = GameObject;
 
+interface WLKObjVol {
+  monoNameIndex: number;
+  pickupVolume: number;
+  scaleX: number;
+  scaleY: number;
+  scaleZ: number;
+}
+
+const getBaseVolume = (ov: WLKObjVol): number => 
+  ov.pickupVolume / (ov.scaleX * ov.scaleY * ov.scaleZ);
+
 // ** assumes query is pre-normalized to be lower case **
 const objectNameDistance = (
   object: WLKObject,
@@ -31,33 +42,44 @@ export class WLKObjectDb implements GameObjectDb<WLKObject> {
       }
     });
 
-    this.auditObjVols();
-
-    getCsvData(DATA.WLKR_OBJ_VOLS).forEach(p => {
+    this.readObjVols().forEach(p => {
       if (this.objectList[p.monoNameIndex] !== undefined) {
         this.objectList[p.monoNameIndex].pickupVolume = p.pickupVolume;
       }
     });
+
+    this.auditObjVols();
+  }
+
+  readObjVols(): WLKObjVol[] {
+    return getCsvData(DATA.WLKR_OBJ_VOLS).map(ov => ({
+      monoNameIndex: parseInt(ov.monoNameIndex),
+      pickupVolume: parseFloat(ov.pickupVolume),
+      scaleX: parseFloat(ov.scaleX),
+      scaleY: parseFloat(ov.scaleY),
+      scaleZ: parseFloat(ov.scaleZ),
+    }))
   }
 
   auditObjVols() {
-    const volsByName: Record<number, string[]> = getCsvData(
-      DATA.WLKR_OBJ_VOLS,
-    ).reduce((table: Record<number, string[]>, next) => {
+    const volsByName: Record<number, WLKObjVol[]> = this.readObjVols().reduce((table: Record<number, WLKObjVol[]>, next) => {
       const { monoNameIndex, pickupVolume } = next;
-      if (parseFloat(pickupVolume) == 0) return table;
+      if (pickupVolume == 0) return table;
+
+      const baseVol = getBaseVolume(next);
 
       if (table[monoNameIndex] === undefined) {
-        table[monoNameIndex] = [pickupVolume];
-      } else if (!table[monoNameIndex].includes(pickupVolume)) {
-        table[monoNameIndex].push(pickupVolume);
+        table[monoNameIndex] = [next];
+      } else if (!table[monoNameIndex].find(x => Math.abs(1 - getBaseVolume(x) / baseVol) < 0.01)) {
+        table[monoNameIndex].push(next)
       }
       return table;
     }, {});
 
     for (const nameIdx in volsByName) {
       if (volsByName[nameIdx].length > 1) {
-        console.log(`big set: ${nameIdx} // ${volsByName[nameIdx].join(',')}`);
+        const engName = this.objectList[nameIdx].englishName;
+        console.log(`big set: ${nameIdx} (${engName}) // ${volsByName[nameIdx].map(x => JSON.stringify(x)).join(',')}`);
       }
     }
   }
@@ -137,3 +159,5 @@ export class WLKObjectDb implements GameObjectDb<WLKObject> {
 }
 
 export const wlkdb = new WLKObjectDb();
+
+wlkdb.auditObjVols();

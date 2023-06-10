@@ -1,4 +1,5 @@
 import { VolRatesRecord } from '.';
+import { DATA, getCsvData } from '../get-data';
 
 export enum WLK_MISSIONS {
   big1_1 = 'big1_1',
@@ -1645,5 +1646,3 @@ export const WLK_VOLRATES: VolRatesRecord<WLK_MISSIONS> = WLK_MISSION_NAMES.redu
   },
   {},
 );
-
-console.log(WLK_VOLRATES);

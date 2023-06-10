@@ -374,7 +374,7 @@ export const handleCalcCommand = (query: string, game: GAME): string => {
   switch (operand) {
     case OPERAND.PLUS: {
       const resultSize = addObjectList(missionData, targetSize.cm, objList);
-      const resultStr = printCm(resultSize, 4);
+      const resultStr = printCm(resultSize, 7);
 
       return (
         `**${mission}**: ${printTargetSize(targetSize)} + ` +
@@ -635,7 +635,7 @@ export const handleAnalogyCommand = (
 
 console.log(
   handleCalcCommand(
-    'sweet_1: 50.02 + strawberry flower, grape flower, strawberry flower, grape flower, mandarin flower, big chocolate pie x6',
+    'sweet_1: 7.413263321 + mosquito x2, aaa battery x2',
     GAME.WLK,
   ),
 );
