@@ -88,6 +88,7 @@ const katamariConfig: NotificationConfig = {
       'jokopoking',
       'journeymanb',
       'kamacrimson',
+      'katamarispeedruns',
       'klohinx',
       'kofize',
       'kotonebeta',
