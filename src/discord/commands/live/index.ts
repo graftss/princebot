@@ -68,6 +68,7 @@ const katamariConfig: NotificationConfig = {
       'devteamster',
       'dsun',
       'dunewacky',
+      'ekahs_2',
       'enzor_au',
       // 'esamarathon',
       // 'esamarathon2',
