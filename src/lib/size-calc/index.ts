@@ -335,7 +335,7 @@ export const handleCalcCommand = (query: string, game: GAME): string => {
   const gameData = GAME_DATA[game];
   const gameObjDb = GAME_DBS[game];
   const lang: Language = Language.ENGLISH;
-  const queryRegex = /^\s*([\w ]+)\s*:\s*([^-+]+)\s*([-+])\s*(.*)$/;
+  const queryRegex = /^\s*\!calc\s+([\w ]+)\s*:\s*([^-+]+)\s*([-+])\s*(.*)$/;
 
   const match = query.match(queryRegex);
   if (match === null) {
@@ -623,11 +623,11 @@ export const handleAnalogyCommand = (
 
 /*example commands
   handleCalcCommand(
-    '!calc moon: starfish island - anchor island'
+    'moon: starfish island - anchor island'
   );
 
   handleCalcCommand(
-    `!calc mas7: garbage - kid's tricycle x9, welcome mat`
+    `mas7: garbage - kid's tricycle x9, welcome mat`
   );
 
 
@@ -635,7 +635,7 @@ export const handleAnalogyCommand = (
 
 console.log(
   handleCalcCommand(
-    'sweet_1: 7.413263321 + mosquito x2, aaa battery x2',
-    GAME.WLK,
+    `!calc mas7: garbage - kid's tricycle x9, welcome mat`,
+    GAME.KD,
   ),
 );

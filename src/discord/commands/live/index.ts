@@ -119,6 +119,7 @@ const katamariConfig: NotificationConfig = {
       'syugosyugi',
       'the_mountain_fox',
       'theterrifictracy',
+      'tokyogameshow1',
       'twilightpb',
       'xainjaya',
       'xephyrsg',
@@ -133,7 +134,7 @@ export const command: Command = {
       onReady(client, testConfig);
     } else {
       onReady(client, katamariConfig);
-      onReady(client, chestConfig);
+      // onReady(client, chestConfig);
     }
   },
 };
