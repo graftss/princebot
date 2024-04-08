@@ -11,6 +11,7 @@ const retired = [
   '<:scuffed:609557151685279805>',
   '<:babyCow:625343020702629889>',
   '<:penguinLuck:638089244245753856>',
+  '<:BIGGESTMOMMACONCERN:956617687990165594>',
 ];
 */
 
@@ -19,7 +20,7 @@ export const katamariEmotes = [
   '<:disTurbing:608464094919393289>',
   '<:KingSpy:741109956840783914>',
   '<:ATM:607693808443850847>',
-  '<:BIGGESTMOMMACONCERN:956617687990165594>',
+  '<:TurtleHard:769087349652717588>',
 ];
 
 export const chestEmotes = [
