@@ -94,6 +94,7 @@ const katamariConfig: NotificationConfig = {
       'kofize',
       'kotonebeta',
       'kumasbear',
+      'lenkylad',
       'malkieriking',
       'martini',
       'midboss2',
