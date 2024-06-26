@@ -86,6 +86,7 @@ const katamariConfig: NotificationConfig = {
       'inightfall',
       'itsdavesies',
       'italyflecktarn',
+      'javituesday',
       'jokopoking',
       'journeymanb',
       'kamacrimson',
