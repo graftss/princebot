@@ -123,6 +123,7 @@ const katamariConfig: NotificationConfig = {
       'the_mountain_fox',
       'theterrifictracy',
       'tokyogameshow1',
+      'tonjirurta',
       'twilightpb',
       'xainjaya',
       'xephyrsg',
