@@ -42,6 +42,12 @@ export const createDiscordBot = (): Promise<string> => {
   const state: PersistentState<any> = new PersistentState(config.statePath);
   const cooldownManager: CooldownManager = new CooldownManager();
 
+  console.log('A');
+
+  client.on('error', e => console.log('discord client error: ' + e));
+  client.on('warn', e => console.log('discord client warn: ' + e));
+  client.on('debug', e => console.log('discord client debug: ' + e));
+
   client.once('ready', () => {
     // run command `onReady` handlers
     commands.forEach(command => {
@@ -50,6 +56,7 @@ export const createDiscordBot = (): Promise<string> => {
       }
     });
 
+    console.log('ready');
     // addReactionRoles(client);
   });
 
@@ -67,6 +74,8 @@ export const createDiscordBot = (): Promise<string> => {
       }
     });
   });
+
+  console.log('??');
 
   return client.login(auth.discord.token);
 };
